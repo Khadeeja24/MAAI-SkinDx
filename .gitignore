@@ -1,0 +1,86 @@
+# ══════════════════════════════════════════════════════
+# MAAI-SkinDx — .gitignore
+# ══════════════════════════════════════════════════════
+
+# ── Python cache ───────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py[cod]
+
+# ── Model files — too large for GitHub ────────────────
+*.pth
+*.pt
+*.h5
+*.onnx
+*.bin
+models/
+
+# ── Large feature cache files ─────────────────────────
+*.pkl
+outputs/agent2_features/
+
+# ── HAM10000 images ───────────────────────────────────
+data/raw/ham10000/HAM10000_images_part_1/
+data/raw/ham10000/HAM10000_images_part_2/
+
+# ── Fitzpatrick-17k images ────────────────────────────
+data/raw/fitzpatrick17k/fitzpatrick_3groups/
+
+# ── PAD-UFES-20 images (both folder name variants) ────
+data/raw/pad_ufes20/imgs_part_1/
+data/raw/pad_ufes20/imgs_part_2/
+data/raw/pad_ufes20/imgs_part_3/
+data/raw/pad_ufes_20/
+
+# ── Massive Balanced — 11 GB, never push ──────────────
+data/raw/massive_balanced/
+
+# ── Skin detector training images ─────────────────────
+data/raw/skin_detector_training/
+
+# ── DDI-31 images only (keep CSVs) ───────────────────
+data/raw/ddi31/*.png
+data/raw/ddi31/*.jpg
+data/raw/ddi31/*.jpeg
+data/raw/ddi31/*.zip
+
+# ── Large archive files ────────────────────────────────
+*.zip
+*.tar
+*.tar.gz
+*.gz
+*.rar
+*.7z
+
+# ── Large binary data files ────────────────────────────
+*.npy
+*.npz
+*.hdf5
+
+# ── Documents and PDFs ────────────────────────────────
+Explanation/
+*.pdf
+
+# ── Temporary training files ───────────────────────────
+__init_weights_tmp.pth
+*.tmp
+*.lock
+
+# ── Jupyter ────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── Conda environment ──────────────────────────────────
+*.env
+maai_skin/
+.conda/
+envs/
+
+# ── OS files ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── VS Code (keep settings out of repo) ───────────────
+.vscode/
