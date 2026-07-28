@@ -52,6 +52,28 @@ class FeatureExtractionAgent:
         self.dinov2          = DINOv2Stream()
         self.derm_foundation = DermFoundationStream()
 
+        # GPU warm-up — eliminates slow first inference
+        # DINOv2 and Derm Foundation both compile CUDA kernels
+        # on their first forward pass. Running a dummy image now
+        # means the first real patient image runs at full speed.
+        print(f"  [Agent 2] Warming up GPU...")
+        try:
+            import tempfile
+            import contextlib
+            import io
+            from PIL import Image as _PILImage
+            dummy_arr  = np.zeros((224, 224, 3), dtype=np.uint8)
+            dummy_img  = _PILImage.fromarray(dummy_arr)
+            tmp_path   = os.path.join(
+                tempfile.gettempdir(), "maai_warmup_a2.jpg")
+            dummy_img.save(tmp_path)
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.run(tmp_path)
+            os.remove(tmp_path)
+            print(f"  [Agent 2] GPU ready")
+        except Exception:
+            print(f"  [Agent 2] Warm-up skipped")
+
         print(f"[{self.name}] Ready")
 
     # ─── Normalization Helpers ─────────────────────────────────────

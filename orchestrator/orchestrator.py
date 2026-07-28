@@ -109,8 +109,6 @@ class Orchestrator:
             self._print_summary(result)
             return result
 
-        print(f"\n  Status : PASS")
-        print(f"  Reason : {agent1_result['reason']}")
         print(f"  Agent 1 → PASS. Image approved.")
 
         # ══════════════════════════════════════════════════════════

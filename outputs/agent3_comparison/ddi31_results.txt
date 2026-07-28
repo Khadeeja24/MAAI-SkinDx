@@ -1,0 +1,20 @@
+MAAI-SkinDx | DDI-31 Benchmark Results
+==================================================
+
+Architecture      : COMBINED 8964-dim
+SkinGPT-X baseline: 35.8%
+
+MAAI-SkinDx (no threshold):
+  Accuracy  : 52.29%
+  F1 Score  : 44.40%
+  Recall    : 73.10%
+  Precision : 31.89%
+
+With threshold (0.25):
+  Accuracy  : 49.24%
+  Recall    : 75.44%
+
+Fairness:
+  FST I-II (Light): Acc=50.00% Recall=81.63%
+  FST III-IV (Medium): Acc=56.85% Recall=85.14%
+  FST V-VI (Dark): Acc=49.28% Recall=45.83%

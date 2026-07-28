@@ -1,43 +1,14 @@
-# ══════════════════════════════════════════════════════════════════
 # MAAI-SkinDx | Agent 3 — Disease Classification Agent
-# ══════════════════════════════════════════════════════════════════
-# Receives from Orchestrator:
-#   image_path      : path to approved image (from Agent 1)
-#   agent2_features : 6916-dim feature vector (from Agent 2)
-#
-# Architecture:
-#   ResNet-50 backbone fine-tuned on 4 datasets:
-#     HAM10000 + Fitzpatrick-17k + PAD-UFES-20 + MassiveBalanced
-#   Output: 9 unified disease classes
-#   Backbone features (2048-dim) passed to Agent 4 for Grad-CAM
-#
-# Model performance:
-#   Hold-out F1  : 74.57% (macro, 8,932 images)
-#   Hold-out Acc : 76.94%
-#   Best epoch   : 21
-#
-# Unified 9-class taxonomy:
-#   0: Melanoma
-#   1: Melanocytic Nevus
-#   2: Basal Cell Carcinoma
-#   3: Actinic Keratosis / Squamous Cell Carcinoma
-#   4: Benign Keratosis
-#   5: Vascular Lesion
-#   6: Dermatofibroma
-#   7: Inflammatory
-#   8: Eczema / Dermatitis
-#
-# Clinical safety:
-#   Melanoma safety threshold applied — if melanoma probability
-#   exceeds 0.35, flagged as melanoma even if not top prediction.
-#   Improves melanoma recall toward the 85% clinical target.
-# ══════════════════════════════════════════════════════════════════
+# Uses CombinedModel — same architecture as training.
+# Receives Agent 2 features from Orchestrator.
 
 import os
 import sys
 import numpy as np
 import torch
 import torch.nn as nn
+import warnings
+warnings.filterwarnings("ignore")
 
 sys.path.append(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -45,47 +16,71 @@ sys.path.append(
 from torchvision import transforms, models
 from PIL import Image as PILImage
 from .config import (
-    DEVICE, MODEL_PATH, IN_FEATURES, NUM_CLASSES,
+    DEVICE, MODEL_PATH, NUM_CLASSES,
     CLASS_NAMES, CLASS_FULL_NAMES,
     MELANOMA_SAFETY_THRESHOLD, TOP_N, IMG_SIZE
 )
+
+BACKBONE_DIM = 2048
+AGENT2_DIM   = 6916
 
 VAL_TRANSFORM = transforms.Compose([
     transforms.Resize((IMG_SIZE, IMG_SIZE)),
     transforms.ToTensor(),
     transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
-        std= [0.229, 0.224, 0.225]
-    ),
+        std= [0.229, 0.224, 0.225]),
 ])
+
+
+class CombinedModel(nn.Module):
+    """Identical to train_agent3_final.py — must match exactly."""
+    def __init__(self, combined_dim, num_classes, use_agent2):
+        super().__init__()
+        resnet = models.resnet50(weights=None)
+        self.conv1   = resnet.conv1
+        self.bn1     = resnet.bn1
+        self.relu    = resnet.relu
+        self.maxpool = resnet.maxpool
+        self.layer1  = resnet.layer1
+        self.layer2  = resnet.layer2
+        self.layer3  = resnet.layer3
+        self.layer4  = resnet.layer4
+        self.avgpool = resnet.avgpool
+        self.use_agent2 = use_agent2
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.4),
+            nn.Linear(combined_dim, 512),
+            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(512),
+            nn.Dropout(0.3),
+            nn.Linear(512, num_classes)
+        )
+
+    def forward(self, images, agent2_feats=None):
+        x = self.conv1(images)
+        x = self.bn1(x); x = self.relu(x); x = self.maxpool(x)
+        x = self.layer1(x); x = self.layer2(x)
+        x = self.layer3(x); x = self.layer4(x)
+        x = self.avgpool(x)
+        backbone_feats = torch.flatten(x, 1)
+        if self.use_agent2 and agent2_feats is not None:
+            combined = torch.cat([backbone_feats, agent2_feats], dim=1)
+        else:
+            combined = backbone_feats
+        return self.classifier(combined), backbone_feats
 
 
 class DiagnosisAgent:
 
     def __init__(self):
-        self.name     = "Agent 3 — Disease Classification Agent"
-        self.model    = None
-        self.backbone = None
-
+        self.name         = "Agent 3 — Disease Classification Agent"
+        self.model        = None
+        self.use_agent2   = False
+        self.combined_dim = BACKBONE_DIM
         print(f"\n[{self.name}] Initialising ...")
         self._load_model()
         print(f"[{self.name}] Ready")
-
-    # ─── Private: build ResNet-50 architecture ─────────────────────
-
-    def _build_resnet50(self):
-        model = models.resnet50(weights=None)
-        model.fc = nn.Sequential(
-            nn.Dropout(0.4),
-            nn.Linear(IN_FEATURES, 512),
-            nn.ReLU(inplace=True),
-            nn.BatchNorm1d(512),
-            nn.Dropout(0.3),
-            nn.Linear(512, NUM_CLASSES)
-        )
-        return model
-
-    # ─── Private: load saved checkpoint ───────────────────────────
 
     def _load_model(self):
         script_dir   = os.path.dirname(os.path.abspath(__file__))
@@ -93,197 +88,166 @@ class DiagnosisAgent:
         model_path   = os.path.join(project_root, MODEL_PATH)
 
         if not os.path.exists(model_path):
-            print(f"  [Agent 3] WARNING: Model not found at {model_path}")
-            print(f"  [Agent 3] Run scripts/train_agent3_final.py first")
+            print(f"  [Agent 3] WARNING: {model_path} not found")
+            print(f"  Run scripts/train_agent3_final.py first")
             return
 
         try:
-            ckpt = torch.load(
-                model_path, map_location=DEVICE,
-                weights_only=False)
+            ckpt = torch.load(model_path, map_location=DEVICE,
+                              weights_only=False)
+            use_agent2   = ckpt.get("use_agent2", False)
+            combined_dim = ckpt.get("combined_dim", BACKBONE_DIM)
+            num_classes  = ckpt.get("num_classes", NUM_CLASSES)
 
-            self.model = self._build_resnet50()
+            self.use_agent2   = use_agent2
+            self.combined_dim = combined_dim
+
+            self.model = CombinedModel(
+                combined_dim=combined_dim,
+                num_classes=num_classes,
+                use_agent2=use_agent2)
             self.model.load_state_dict(ckpt["state_dict"])
             self.model.eval()
             self.model = self.model.to(DEVICE)
 
-            # Backbone — ResNet-50 without the fc head
-            # Used for feature extraction for Agent 4 Grad-CAM
-            self.backbone = nn.Sequential(
-                *list(self.model.children())[:-1],
-                nn.Flatten()
-            ).to(DEVICE)
-            self.backbone.eval()
+            print(f"  [Agent 3] Loaded from {model_path}")
+            print(f"  [Agent 3] Architecture : "
+                  f"{'COMBINED' if use_agent2 else 'BACKBONE'} "
+                  f"{combined_dim}-dim")
+            print(f"  [Agent 3] Hold-out F1  : "
+                  f"{ckpt.get('val_f1', 0)*100:.2f}%")
+            print(f"  [Agent 3] Classes      : {num_classes}")
 
-            saved_f1 = ckpt.get("val_f1", 0)
-            saved_cls = ckpt.get("class_names", CLASS_NAMES)
-            saved_datasets = ckpt.get("datasets_used", [])
-
-            print(f"  [Agent 3] Model loaded from {model_path}")
-            print(f"  [Agent 3] Hold-out F1  : {saved_f1*100:.2f}%")
-            print(f"  [Agent 3] Classes      : {NUM_CLASSES}")
-            print(f"  [Agent 3] Trained on   : "
-                  f"{', '.join(saved_datasets)}")
+            # GPU warm-up — eliminates slow first inference
+            # PyTorch compiles CUDA kernels on first forward pass.
+            # Running a dummy image now means first real patient
+            # image runs at full speed (~6s instead of ~17s).
+            print(f"  [Agent 3] Warming up GPU...")
+            with torch.no_grad():
+                dummy_img = torch.zeros(
+                    1, 3, IMG_SIZE, IMG_SIZE).to(DEVICE)
+                dummy_a2  = torch.zeros(
+                    1, AGENT2_DIM).to(DEVICE) \
+                    if use_agent2 else None
+                self.model(dummy_img, dummy_a2)
+            print(f"  [Agent 3] GPU ready")
 
         except Exception as e:
             print(f"  [Agent 3] Load failed: {e}")
-            self.model    = None
-            self.backbone = None
+            self.model = None
 
-    # ─── Private: extract backbone features ───────────────────────
-
-    def _extract_backbone_features(
-        self, image_path: str
-    ) -> np.ndarray:
-        """
-        Extract 2048-dim ResNet-50 backbone features.
-        These penultimate-layer features are passed to
-        Agent 4 for Grad-CAM explainability.
-        """
-        if self.backbone is None:
-            return np.zeros(IN_FEATURES, dtype=np.float32)
-        try:
-            img    = PILImage.open(image_path).convert("RGB")
-            tensor = VAL_TRANSFORM(img).unsqueeze(0).to(DEVICE)
-            with torch.no_grad():
-                feats = self.backbone(tensor)
-            return feats.squeeze().cpu().numpy()
-        except Exception as e:
-            print(f"  [Agent 3] Backbone extraction error: {e}")
-            return np.zeros(IN_FEATURES, dtype=np.float32)
-
-    # ─── Private: get softmax probabilities ───────────────────────
-
-    def _predict_probs(self, image_path: str) -> np.ndarray:
-        """Get softmax probability for all 9 classes."""
+    def _predict(self, image_path, a2_tensor):
         if self.model is None:
             return np.ones(NUM_CLASSES) / NUM_CLASSES
         try:
             img    = PILImage.open(image_path).convert("RGB")
             tensor = VAL_TRANSFORM(img).unsqueeze(0).to(DEVICE)
             with torch.no_grad():
-                logits = self.model(tensor)
-                probs  = torch.softmax(logits, dim=1)
+                out, _ = self.model(tensor, a2_tensor)
+                probs  = torch.softmax(out, dim=1)
             return probs.squeeze().cpu().numpy()
         except Exception as e:
             print(f"  [Agent 3] Prediction error: {e}")
             return np.ones(NUM_CLASSES) / NUM_CLASSES
 
-    # ─── Public: main run method ───────────────────────────────────
+    def _backbone_features(self, image_path, a2_tensor):
+        if self.model is None:
+            return np.zeros(BACKBONE_DIM, dtype=np.float32)
+        try:
+            img    = PILImage.open(image_path).convert("RGB")
+            tensor = VAL_TRANSFORM(img).unsqueeze(0).to(DEVICE)
+            with torch.no_grad():
+                _, feats = self.model(tensor, a2_tensor)
+            return feats.squeeze().cpu().numpy()
+        except Exception as e:
+            print(f"  [Agent 3] Backbone error: {e}")
+            return np.zeros(BACKBONE_DIM, dtype=np.float32)
 
     def run(self, image_path: str,
-            agent2_features: np.ndarray = None) -> dict:
-        """
-        Classify skin disease from approved image.
-        Called by Orchestrator after Agent 2.
+            agent2_features=None) -> dict:
 
-        Args:
-            image_path      : path to image approved by Agent 1
-            agent2_features : 6916-dim vector from Agent 2
-                              (stored, passed to Agent 4 later)
-
-        Returns:
-            dict with:
-                status              : "PASS" or "FAIL"
-                predicted_class     : top predicted class name
-                predicted_name      : full class name with description
-                confidence          : confidence score (0-1)
-                top_5_predictions   : list of top 5 with confidence
-                all_probabilities   : all 9 class probabilities
-                backbone_features   : 2048-dim for Agent 4 Grad-CAM
-                agent2_features     : passed through from Agent 2
-                melanoma_flagged    : True if safety threshold triggered
-        """
-        print(f"\n{'═'*60}")
+        print(f"\n{'='*60}")
         print(f"  {self.name}")
         print(f"  Image : {image_path}")
-        print(f"{'═'*60}")
+        print(f"{'='*60}")
 
         if self.model is None:
             return {
-                "status"          : "FAIL",
-                "reason"          : (
-                    "Agent 3 model not loaded. "
-                    "Run scripts/train_agent3_final.py first."),
-                "top_5_predictions" : [],
-                "backbone_features" : None,
-                "agent2_features"   : agent2_features,
+                "status"           : "FAIL",
+                "reason"           : "Model not loaded.",
+                "top_5_predictions": [],
+                "backbone_features": None,
+                "agent2_features"  : agent2_features,
             }
 
-        # Step A — Get class probabilities
-        print(f"\n  ── Classification ──")
-        probs = self._predict_probs(image_path)
+        # Prepare Agent 2 tensor
+        a2_tensor = None
+        if self.use_agent2 and agent2_features is not None:
+            try:
+                a2_np = np.asarray(agent2_features, dtype=np.float32)
+                if a2_np.shape[0] == AGENT2_DIM:
+                    a2_tensor = torch.from_numpy(a2_np)\
+                        .unsqueeze(0).to(DEVICE)
+            except Exception as e:
+                print(f"  [Agent 3] Agent2 prep error: {e}")
 
-        # Step B — Melanoma safety threshold
-        # Clinical safety: if melanoma probability exceeds threshold,
-        # flag as melanoma even if another class scored higher.
-        # Targets recall ≥ 85% for the most dangerous diagnosis.
+        # Predict
+        print(f"\n  -- Classification --")
+        probs = self._predict(image_path, a2_tensor)
+
+        # Melanoma safety threshold
         melanoma_prob    = float(probs[0])
-        melanoma_flagged = False
+        melanoma_flagged = melanoma_prob >= MELANOMA_SAFETY_THRESHOLD
+        predicted_idx    = 0 if melanoma_flagged else int(np.argmax(probs))
 
-        if melanoma_prob >= MELANOMA_SAFETY_THRESHOLD:
-            predicted_idx    = 0
-            melanoma_flagged = True
-            print(f"  ⚠  Melanoma safety threshold triggered")
-            print(f"     Melanoma prob={melanoma_prob:.3f} >= "
-                  f"threshold={MELANOMA_SAFETY_THRESHOLD}")
-        else:
-            predicted_idx = int(np.argmax(probs))
+        if melanoma_flagged:
+            print(f"  WARNING: Melanoma safety threshold triggered "
+                  f"(prob={melanoma_prob:.3f} >= {MELANOMA_SAFETY_THRESHOLD})")
 
-        # Step C — Build top 5 predictions
+        # Top 5
         top_indices = np.argsort(probs)[::-1][:TOP_N]
-        top_5       = []
+        top_5 = []
         for rank, idx in enumerate(top_indices):
-            idx      = int(idx)
-            cls_name = CLASS_NAMES.get(idx, f"Class {idx}")
+            idx  = int(idx)
+            name = CLASS_NAMES.get(idx, f"Class {idx}")
             top_5.append({
                 "rank"          : rank + 1,
                 "class_index"   : idx,
-                "class_name"    : cls_name,
-                "class_full"    : CLASS_FULL_NAMES.get(
-                    idx, cls_name),
+                "class_name"    : name,
+                "class_full"    : CLASS_FULL_NAMES.get(idx, name),
                 "confidence"    : float(probs[idx]),
                 "confidence_pct": f"{probs[idx]*100:.1f}%",
             })
 
-        # Step D — Print top 5
         print(f"\n  Top {TOP_N} predictions:")
-        for pred in top_5:
-            flag = " ← FLAGGED" \
-                if pred["class_index"] == 0 and melanoma_flagged \
-                else ""
-            bar = "█" * int(pred["confidence"] * 20)
-            print(f"    {pred['rank']}. "
-                  f"{pred['class_name']:<45} "
-                  f"{pred['confidence_pct']:>6}  {bar}{flag}")
+        for p in top_5:
+            bar = "█" * int(p["confidence"] * 20)
+            print(f"    {p['rank']}. {p['class_name']:<45} "
+                  f"{p['confidence_pct']:>6}  {bar}")
 
-        # Step E — Extract backbone features for Agent 4
-        print(f"\n  ── Backbone features for Agent 4 ──")
-        backbone_feats = self._extract_backbone_features(image_path)
-        print(f"  Backbone features : {backbone_feats.shape} "
-              f"(for Grad-CAM in Agent 4)")
-
-        print(f"{'═'*60}\n")
+        print(f"\n  -- Backbone features for Agent 4 --")
+        backbone = self._backbone_features(image_path, a2_tensor)
+        print(f"  Shape: {backbone.shape}")
+        print(f"{'='*60}\n")
 
         predicted_name = CLASS_NAMES.get(predicted_idx,
                                           f"Class {predicted_idx}")
-
         return {
-            "status"            : "PASS",
-            "reason"            : "Classification complete.",
-            "predicted_class"   : predicted_name,
-            "predicted_name"    : CLASS_FULL_NAMES.get(
+            "status"           : "PASS",
+            "reason"           : "Classification complete.",
+            "predicted_class"  : predicted_name,
+            "predicted_name"   : CLASS_FULL_NAMES.get(
                 predicted_idx, predicted_name),
-            "predicted_index"   : predicted_idx,
-            "confidence"        : float(probs[predicted_idx]),
-            "confidence_pct"    : f"{probs[predicted_idx]*100:.1f}%",
-            "melanoma_flagged"  : melanoma_flagged,
-            "melanoma_prob"     : melanoma_prob,
-            "top_5_predictions" : top_5,
-            "all_probabilities" : {
+            "predicted_index"  : predicted_idx,
+            "confidence"       : float(probs[predicted_idx]),
+            "confidence_pct"   : f"{probs[predicted_idx]*100:.1f}%",
+            "melanoma_flagged" : melanoma_flagged,
+            "melanoma_prob"    : melanoma_prob,
+            "top_5_predictions": top_5,
+            "all_probabilities": {
                 CLASS_NAMES.get(i, f"Class {i}"): float(probs[i])
                 for i in range(NUM_CLASSES)
             },
-            "backbone_features" : backbone_feats,
-            "agent2_features"   : agent2_features,
+            "backbone_features": backbone,
+            "agent2_features"  : agent2_features,
         }
