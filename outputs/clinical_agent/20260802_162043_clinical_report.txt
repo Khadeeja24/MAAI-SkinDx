@@ -1,0 +1,42 @@
+MAAI-SkinDx | Clinical Agent — Risk Assessment
+Case ID   : 20260802_162043
+============================================================
+
+PATIENT INFORMATION
+  Age              : 28
+  Gender           : MALE
+  Skin tone (FST)  : 2
+  Region           : ARM
+
+LESION SYMPTOMS
+  Changed recently : False
+  Grew             : False
+  Bleeds           : False
+  Elevated / Raised: False
+  Hurts            : False
+  Itches           : False
+
+PATIENT HISTORY
+  Skin cancer history : False
+  Cancer history      : False
+  Smoker              : False
+
+RISK ASSESSMENT
+  Rule-based score : 0 / 100
+  ML model probability : 22.7%
+  Risk level       : LOW
+
+RISK FACTORS IDENTIFIED
+  ✓ No significant risk factors identified
+
+RECOMMENDATION
+  Routine monitoring. Follow up in 6-12 months.
+
+IMPORTANT NOTICE
+  This clinical risk assessment is based on patient-
+  reported symptoms and should be interpreted alongside
+  the AI image diagnosis (Agent 3) and visual
+  explanation (Agent 4). Final clinical decisions must
+  be made by a qualified clinician.
+
+============================================================

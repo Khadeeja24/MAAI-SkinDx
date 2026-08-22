@@ -1,0 +1,48 @@
+MAAI-SkinDx | Clinical Agent — Risk Assessment
+Case ID   : 20260802_132218
+============================================================
+
+PATIENT INFORMATION
+  Age              : 67
+  Gender           : FEMALE
+  Skin tone (FST)  : 3
+  Region           : FACE
+
+LESION SYMPTOMS
+  Changed recently : True
+  Grew             : True
+  Bleeds           : False
+  Elevated / Raised: True
+  Hurts            : False
+  Itches           : True
+
+PATIENT HISTORY
+  Skin cancer history : True
+  Cancer history      : False
+  Smoker              : False
+
+RISK ASSESSMENT
+  Rule-based score : 100 / 100
+  ML model probability : 89.1%
+  Risk level       : CRITICAL
+
+RISK FACTORS IDENTIFIED
+  ✗ Lesion changed recently (+30 pts)
+  ✗ Lesion grew (+20 pts)
+  ✗ Lesion is raised (+10 pts)
+  ✗ Lesion itches (+5 pts)
+  ✗ Previous skin cancer (+20 pts)
+  ✗ Age 67 (60-70) (+15 pts)
+  ✗ Lesion size 12mm (10-15mm) (+8 pts)
+
+RECOMMENDATION
+  Urgent referral required. Seek assessment immediately.
+
+IMPORTANT NOTICE
+  This clinical risk assessment is based on patient-
+  reported symptoms and should be interpreted alongside
+  the AI image diagnosis (Agent 3) and visual
+  explanation (Agent 4). Final clinical decisions must
+  be made by a qualified clinician.
+
+============================================================
