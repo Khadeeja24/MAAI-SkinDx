@@ -5,20 +5,17 @@
 # All agents report to the Orchestrator only.
 # No agent talks directly to another agent.
 #
-# Current flow (sequential):
+# Pipeline flow:
 #   Patient submits image + symptoms
 #   Orchestrator → Agent 1 (image quality check)
 #   Orchestrator → Agent 2 (visual feature extraction)
 #   Orchestrator → Agent 3 (disease classification)
-#   [Agent 4, Clinical Agent, Agent 5, Agent 7 — coming next]
-#
-# Agent 3 inputs:
-#   image_path      : approved image path from Agent 1
-#   agent2_features : 6916-dim feature vector from Agent 2
-#
-# Agent 3 outputs:
-#   top_5_predictions  : ranked disease predictions with confidence
-#   backbone_features  : 2048-dim ResNet-50 features for Agent 4
+#   Agent 3 finishes →
+#     Agent 4 (XAI Grad-CAM) + Clinical Agent run IN PARALLEL
+#   Both finish → Agent 5 (RAG) — coming next
+#   Agent 5 finishes → Orchestrator 5-stage review
+#   Review done → Agent 7 (clinical report) — coming next
+#   Agent 6 → Background learning (completely separate)
 # ══════════════════════════════════════════════════════════════════
 
 import os
@@ -28,19 +25,23 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(PROJECT_ROOT)
 
-from agents.agent1_image_quality    import ImageQualityAgent
+from agents.agent1_image_quality      import ImageQualityAgent
 from agents.agent2_feature_extraction import FeatureExtractionAgent
-from agents.agent3_diagnosis        import DiagnosisAgent
+from agents.agent3_diagnosis          import DiagnosisAgent
+from agents.agent4_xai                import XAIAgent
+from agents.clinical_agent            import ClinicalAgent
 
 
 class Orchestrator:
     """
     Central coordinator for the MAAI-SkinDx pipeline.
     Receives patient submissions and manages agent execution.
+    No agent ever talks to another agent directly.
     """
 
     def __init__(self):
@@ -49,9 +50,11 @@ class Orchestrator:
         print("═" * 60)
 
         print("\n  Loading agents...")
-        self.agent1 = ImageQualityAgent()
-        self.agent2 = FeatureExtractionAgent()
-        self.agent3 = DiagnosisAgent()
+        self.agent1   = ImageQualityAgent()
+        self.agent2   = FeatureExtractionAgent()
+        self.agent3   = DiagnosisAgent()
+        self.agent4   = XAIAgent()
+        self.clinical = ClinicalAgent()
         print("  All agents ready.")
         print("═" * 60 + "\n")
 
@@ -62,9 +65,13 @@ class Orchestrator:
 
         Args:
             image_path (str)  : Path to the uploaded image.
-            symptoms   (dict) : Patient symptom data (optional).
-                                Keys: age, lesion_duration, skin_tone,
-                                      family_history, lesion_changed
+            symptoms   (dict) : Patient symptom data from form.
+                                Keys: age, itch, grew, hurt,
+                                      changed, bleed, elevation,
+                                      skin_cancer_history,
+                                      cancer_history, fitspatrick,
+                                      gender, region, diameter_1,
+                                      diameter_2, smoke, drink
 
         Returns:
             dict: Full pipeline result with all agent outputs.
@@ -78,7 +85,7 @@ class Orchestrator:
         print(f"  Symptoms provided: {'Yes' if symptoms else 'No'}")
         print("═" * 60)
 
-        # ── Result dictionary ────────────────────────────────────
+        # ── Result dictionary ──────────────────────────────────────
         result = {
             "case_id"        : case_id,
             "image_path"     : image_path,
@@ -142,8 +149,8 @@ class Orchestrator:
         print("\n── Step 3: Agent 3 — Disease Classification ──")
 
         agent3_result = self.agent3.run(
-            image_path     = image_path,
-            agent2_features= feature_vector
+            image_path      = image_path,
+            agent2_features = feature_vector
         )
         result["agents"]["agent3"] = agent3_result
 
@@ -159,23 +166,125 @@ class Orchestrator:
             self._print_summary(result)
             return result
 
-        predicted_name = agent3_result.get("predicted_name", "Unknown")
-        confidence     = agent3_result.get("confidence", 0) * 100
+        predicted_name  = agent3_result.get("predicted_name",  "Unknown")
+        predicted_class = agent3_result.get("predicted_class", "Unknown")
+        predicted_index = agent3_result.get("predicted_index", 0)
+        confidence      = agent3_result.get("confidence", 0) * 100
+
         print(f"\n  Agent 3 → PASS.")
         print(f"  Predicted disease : {predicted_name}")
         print(f"  Confidence        : {confidence:.1f}%")
 
         # ══════════════════════════════════════════════════════════
-        # STEPS 4-7 — Placeholder (coming next)
+        # STEPS 4 + 5 — Agent 4 (XAI) + Clinical Agent — PARALLEL
+        #
+        # Agent 3 has finished its image-based diagnosis.
+        # Now two agents start at the same time:
+        #
+        # Agent 4 — XAI Explainability:
+        #   Uses Grad-CAM to explain WHY Agent 3 made that
+        #   prediction. Generates heatmap overlay and written
+        #   explanation for the doctor.
+        #
+        # Clinical Agent — Symptom Risk Assessment:
+        #   Takes patient form data (age, symptoms, history)
+        #   and produces a clinical risk score independently
+        #   of the image diagnosis.
+        #
+        # These two do not depend on each other → run in parallel.
+        # Both report results back to Orchestrator when done.
         # ══════════════════════════════════════════════════════════
-        # Agent 4 (XAI — Grad-CAM + SHAP) runs in parallel with:
-        # Clinical Agent (symptom risk scoring)
-        # Then:
-        # Agent 5 (RAG knowledge retrieval)
-        # Agent 7 (clinical report generation)
+        print("\n── Steps 4+5: Agent 4 (XAI) + Clinical Agent [parallel] ──")
+
+        agent4_result   = None
+        clinical_result = None
+
+        def run_agent4():
+            """Agent 4 — Grad-CAM XAI explainability."""
+            return self.agent4.run(
+                image_path      = image_path,
+                agent3_model    = self.agent3.model,
+                agent2_features = feature_vector,
+                predicted_index = predicted_index,
+                predicted_name  = predicted_class,
+                confidence      = agent3_result.get("confidence", 0.0),
+                use_agent2      = self.agent3.use_agent2,
+                case_id         = case_id,
+                top_5           = agent3_result.get("top_5_predictions", []),
+            )
+
+        def run_clinical():
+            """Clinical Agent — patient symptom risk scoring."""
+            return self.clinical.run(
+                symptoms = symptoms or {},
+                case_id  = case_id,
+            )
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            futures = {
+                executor.submit(run_agent4)   : "agent4",
+                executor.submit(run_clinical) : "clinical",
+            }
+            for future in as_completed(futures):
+                name = futures[future]
+                try:
+                    res = future.result()
+                    if name == "agent4":
+                        agent4_result   = res
+                    else:
+                        clinical_result = res
+                    print(f"  {name.upper()} completed — "
+                          f"status: {res.get('status', 'UNKNOWN')}")
+                except Exception as e:
+                    print(f"  {name.upper()} failed: {e}")
+                    if name == "agent4":
+                        agent4_result   = {
+                            "status": "FAIL", "reason": str(e)}
+                    else:
+                        clinical_result = {
+                            "status": "FAIL", "reason": str(e)}
+
+        result["agents"]["agent4"]   = agent4_result
+        result["agents"]["clinical"] = clinical_result
+
+        # ══════════════════════════════════════════════════════════
+        # STEPS 6, 7, 8 — Coming next
+        #
+        # Agent 5 : RAG knowledge retrieval
+        #   Searches confirmed past cases matching image findings
+        #   + clinical symptoms combined
+        #
+        # Orchestrator 5-stage review:
+        #   Resolves disagreements between image diagnosis (Agent 3),
+        #   XAI explanation (Agent 4), and clinical risk (Clinical)
+        #   to produce one final trustworthy diagnosis
+        #
+        # Agent 7 : Clinical report generation
+        #   Writes official clinical report in medical format
+        #   ready for a doctor to read
+        #
+        # Agent 6 : Background continuous learning
+        #   Completely separate — never blocks this pipeline
         # ══════════════════════════════════════════════════════════
 
-        elapsed = round(time.time() - start_time, 2)
+        # ── Build final result ──────────────────────────────────────
+        elapsed     = round(time.time() - start_time, 2)
+        xai_status  = agent4_result.get("status", "FAIL") \
+                      if agent4_result else "FAIL"
+        overlay     = agent4_result.get("overlay_path", "") \
+                      if agent4_result else ""
+        explanation = agent4_result.get("explanation", "") \
+                      if agent4_result else ""
+        clin_status = clinical_result.get("status", "FAIL") \
+                      if clinical_result else "FAIL"
+        risk_level  = clinical_result.get("risk_level", None) \
+                      if clinical_result else None
+
+        # Build message
+        clin_msg = ""
+        if risk_level:
+            clin_msg = f" Clinical risk: {risk_level}."
+
         result.update({
             "pipeline_status"  : "PARTIAL",
             "final_status"     : "PASS",
@@ -183,12 +292,18 @@ class Orchestrator:
             "confidence"       : f"{confidence:.1f}%",
             "top_5_predictions": agent3_result.get(
                 "top_5_predictions", []),
+            "xai_overlay"      : overlay,
+            "xai_status"       : xai_status,
+            "xai_explanation"  : explanation,
+            "clinical_status"  : clin_status,
+            "clinical_risk"    : risk_level,
             "message"          : (
                 f"Image quality check passed. "
                 f"Features extracted ({feature_dim} dims). "
                 f"Disease classified: {predicted_name} "
                 f"({confidence:.1f}% confidence). "
-                f"XAI, RAG, and report generation coming next."
+                f"XAI explanation generated.{clin_msg} "
+                f"RAG and report generation coming next."
             ),
             "elapsed_seconds"  : elapsed,
         })
@@ -216,5 +331,18 @@ class Orchestrator:
                 print(f"    {pred['rank']}. "
                       f"{pred['class_name']:<35} "
                       f"{pred['confidence_pct']:>6}  {bar}")
+
+        if result.get("xai_overlay"):
+            print(f"\n  XAI Overlay : {result['xai_overlay']}")
+            print(f"  XAI Status  : {result.get('xai_status', '')}")
+
+        clin = result.get("agents", {}).get("clinical", {})
+        if clin and clin.get("risk_level"):
+            print(f"\n  Clinical Risk  : {clin['risk_level']} "
+                  f"(score {clin['risk_score']}/100)")
+            if clin.get("ml_probability") is not None:
+                print(f"  ML Probability : "
+                      f"{clin['ml_probability']*100:.1f}%")
+            print(f"  Recommendation : {clin['recommendation']}")
 
         print("═" * 60 + "\n")
