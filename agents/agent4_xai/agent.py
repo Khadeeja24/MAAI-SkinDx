@@ -8,7 +8,7 @@
 # Two-part explanation system:
 #   Part 1 — Grad-CAM: pure mathematics, hooks into layer4
 #             produces heatmap and activation statistics
-#   Part 2 — LLM: Groq LLaMA-3.3-70b-versatile generates
+#   # Part 2 — LLM: Groq openai/gpt-oss-120b generates
 #             natural language clinical explanation from stats
 #             Falls back to template if Groq unavailable
 #
@@ -54,7 +54,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 MALIGNANT_CLASSES        = {0, 2, 3}
 SECONDARY_CAM_THRESHOLD  = 0.60
-LLM_MODEL                = "llama-3.3-70b-versatile"
+LLM_MODEL                = "openai/gpt-oss-120b"
 LLM_MAX_TOKENS           = 400
 LLM_TEMPERATURE          = 0.3
 
