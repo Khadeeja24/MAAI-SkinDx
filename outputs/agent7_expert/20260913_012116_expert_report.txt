@@ -1,0 +1,163 @@
+
+=================================================================
+     MAAI-SkinDx | CLINICAL EXPERT CONSULTATION REPORT
+=================================================================
+  Multi-Agent AI System for Automated Dermatological Diagnosis
+  Insight Centre for Data Analytics | University of Galway
+  Supervisor: Dr. Saeed Alsamhi
+=================================================================
+
+SECTION 1 — CASE INFORMATION
+=================================================================
+  Case ID         : 20260913_012116
+  Report Date     : 13 September 2026
+  Report Time     : 01:21
+  Report Type     : LLM-Generated (openai/gpt-oss-120b)
+  System          : MAAI-SkinDx Expert Agent v1.0
+  Pipeline Status : Complete
+
+=================================================================
+SECTION 2 — PATIENT INFORMATION
+=================================================================
+  Age             : Not provided
+  Gender          : Not provided
+  Skin Tone       : Not provided
+  Affected Region : Not provided
+  Lesion Size     : Not provided mm x Not provided mm
+  Symptoms provided: No — image only assessment
+
+  REPORTED SYMPTOMS:
+    No significant symptoms reported
+
+  PATIENT HISTORY:
+    No significant history
+
+=================================================================
+SECTION 3 — AI DIAGNOSTIC SUMMARY
+=================================================================
+  Primary Diagnosis  : Melanocytic Nevus (Common Mole)
+  AI Confidence      : 69.7%
+  Classification     : Benign
+  Coordination Decision : ROUTINE
+  Clinical Urgency   : ROUTINE — Follow up in 6 to 12 months
+
+  Decision Rationale :
+    Image and clinical evidence are concordant. Clinical risk is LOW. Routine monitoring is recommended.
+
+  TOP 5 AI PREDICTIONS:
+    1. Melanocytic Nevus                           69.7%  █████████████
+    2. Benign Keratosis                            20.3%  ████
+    3. Melanoma                                     9.5%  █
+    4. Vascular Lesion                              0.3%  
+    5. Inflammatory                                 0.1%  
+
+=================================================================
+SECTION 4 — VISUAL ANALYSIS (Grad-CAM XAI Agent)
+=================================================================
+  Focus Pattern   : focus_on_lesion
+  XAI Explanation :
+    MAAI-SkinDx | Agent 4 — XAI Explanation
+Case ID            : 20260913_012116
+Explanation source : LLM-generated (Groq LLaMA-3.3-70b)
+============================================================
+
+PREDICTION SUMMARY
+  Predicted condition : Melanocytic Nevus
+  Confidence          : 69.7%
+  Clinical urgency    : LOW — Benign. Routine monitoring advised.
+
+VISUAL EXPLANATION
+  The Grad‑CAM map shows a tightly focused activation (spread 0.236) centered within the lesion (peak at row 2, column 3), indic
+
+=================================================================
+SECTION 5 — CLINICAL RISK ASSESSMENT
+=================================================================
+  Rule-Based Score : 0/100
+  ML Probability   : Not available
+  Risk Level       : NOT ASSESSED
+
+  RISK FACTORS IDENTIFIED:
+    No significant risk factors identified
+
+=================================================================
+SECTION 6 — COORDINATION AGENT ANALYSIS
+=================================================================
+  Conflict Type    : NO_CLINICAL_DATA
+  Conflict Severity: NONE
+  Analysis         :
+    No symptom data was submitted. The diagnostic decision is based on image evidence only.
+
+  ADAPTIVE FUSION WEIGHTS:
+    agent1      : 0.3164  █████████
+    agent2      : 0.3070  █████████
+    agent3      : 0.1672  █████
+    agent4      : 0.2095  ██████
+    clinical    : 0.0000  
+
+  Fused Malignancy Signal : 0.3029
+
+=================================================================
+SECTION 7 — CLINICAL KNOWLEDGE SUMMARY (DermNet NZ via RAG)
+=================================================================
+  The AI’s top prediction of a common melanocytic nevus (69.7% confidence) aligns with DermNet NZ’s description of typical benign pigmented nevi, which are usually symmetric, uniform in color, and have well‑defined borders. Key differentials to keep in mind are a seborrheic keratosis (especially if a stuck‑on appearance is noted), early melanoma (particularly if there is asymmetry, color variegation, or evolution), a vascular lesion, and an inflammatory papule. Given the rule‑based risk score of 0/100 and the absence of any high‑risk clinical flags, the lesion can be managed conservatively with routine dermoscopic surveillance and patient education on the ABCDE criteria; excision is reserved for any change or atypical features on follow‑up. No discordance between the image‑based prediction and the clinical risk assessment is evident, and the urgency is low (routine follow‑up rather than urgent referral).
+
+=================================================================
+SECTION 8 — DIFFERENTIAL DIAGNOSES
+=================================================================
+
+
+=================================================================
+SECTION 9 — RECOMMENDED INVESTIGATIONS
+=================================================================
+
+
+=================================================================
+SECTION 10 — TREATMENT RECOMMENDATIONS
+=================================================================
+
+
+=================================================================
+SECTION 11 — MEDICATIONS
+=================================================================
+
+
+=================================================================
+SECTION 12 — THINGS TO AVOID
+=================================================================
+
+
+=================================================================
+SECTION 13 — FOLLOW-UP SCHEDULE
+=================================================================
+
+
+=================================================================
+SECTION 14 — REFERRAL DECISION
+=================================================================
+
+
+=================================================================
+SECTION 15 — IMPORTANT DISCLAIMER
+=================================================================
+  This report has been generated by MAAI-SkinDx, an AI-assisted
+  dermatological diagnosis system developed at the Insight Centre
+  for Data Analytics, University of Galway.
+
+  This report is intended to SUPPORT clinical decision making by
+  a qualified healthcare professional only. It does NOT replace
+  clinical examination, professional medical judgement, or
+  established diagnostic procedures.
+
+  All AI predictions, risk scores, and recommendations in this
+  report must be verified and acted upon by a qualified clinician.
+
+  System performance: 74.18% macro F1 on 7,734 hold-out test
+  images across 9 disease classes.
+
+  For emergencies contact emergency services immediately.
+  Do not wait for AI assessment in an emergency situation.
+
+  Generated by  : MAAI-SkinDx Expert Agent
+  Institution   : University of Galway, Ireland
+  Supervisor    : Dr. Saeed Alsamhi
+=================================================================

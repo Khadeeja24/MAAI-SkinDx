@@ -1,0 +1,197 @@
+
+=================================================================
+     MAAI-SkinDx | CLINICAL EXPERT CONSULTATION REPORT
+=================================================================
+  Multi-Agent AI System for Automated Dermatological Diagnosis
+  Insight Centre for Data Analytics | University of Galway
+  Supervisor: Dr. Saeed Alsamhi
+=================================================================
+
+SECTION 1 — CASE INFORMATION
+=================================================================
+  Case ID         : 20260913_010928
+  Report Date     : 13 September 2026
+  Report Time     : 01:09
+  Report Type     : LLM-Generated (openai/gpt-oss-120b)
+  System          : MAAI-SkinDx Expert Agent v1.0
+  Pipeline Status : Complete
+
+=================================================================
+SECTION 2 — PATIENT INFORMATION
+=================================================================
+  Age             : Not provided
+  Gender          : Not provided
+  Skin Tone       : Not provided
+  Affected Region : Not provided
+  Lesion Size     : Not provided mm x Not provided mm
+  Symptoms provided: No — image only assessment
+
+  REPORTED SYMPTOMS:
+    No significant symptoms reported
+
+  PATIENT HISTORY:
+    No significant history
+
+=================================================================
+SECTION 3 — AI DIAGNOSTIC SUMMARY
+=================================================================
+  Primary Diagnosis  : Melanocytic Nevus (Common Mole)
+  AI Confidence      : 69.7%
+  Classification     : Benign
+  Coordination Decision : CONCORDANT
+  Clinical Urgency   : MODERATE — Clinical assessment within 4 weeks
+
+  Decision Rationale :
+    Image and clinical evidence are concordant. Clinical risk is MODERATE. Clinical assessment within four weeks.
+
+  TOP 5 AI PREDICTIONS:
+    1. Melanocytic Nevus                           69.7%  █████████████
+    2. Benign Keratosis                            20.3%  ████
+    3. Melanoma                                     9.5%  █
+    4. Vascular Lesion                              0.3%  
+    5. Inflammatory                                 0.1%  
+
+=================================================================
+SECTION 4 — VISUAL ANALYSIS (Grad-CAM XAI Agent)
+=================================================================
+  Focus Pattern   : focus_on_lesion
+  XAI Explanation :
+    MAAI-SkinDx | Agent 4 — XAI Explanation
+Case ID            : 20260913_010928
+Explanation source : LLM-generated (Groq LLaMA-3.3-70b)
+============================================================
+
+PREDICTION SUMMARY
+  Predicted condition : Melanocytic Nevus
+  Confidence          : 69.7%
+  Clinical urgency    : LOW — Benign. Routine monitoring advised.
+
+VISUAL EXPLANATION
+  The Grad‑CAM map shows a tightly focused activation (spread = 0.236) centered within the lesion (peak at row 2, column 3), ind
+
+=================================================================
+SECTION 5 — CLINICAL RISK ASSESSMENT
+=================================================================
+  Rule-Based Score : 0/100
+  ML Probability   : Not available
+  Risk Level       : NOT ASSESSED
+
+  RISK FACTORS IDENTIFIED:
+    No significant risk factors identified
+
+=================================================================
+SECTION 6 — COORDINATION AGENT ANALYSIS
+=================================================================
+  Conflict Type    : NO_CLINICAL_DATA
+  Conflict Severity: NONE
+  Analysis         :
+    No symptom data was submitted. The diagnostic decision is based on image evidence only.
+
+  ADAPTIVE FUSION WEIGHTS:
+    agent1      : 0.0000  
+    agent2      : 0.0000  
+    agent3      : 1.0000  ██████████████████████████████
+    agent4      : 0.0000  
+    clinical    : 0.0000  
+
+  Fused Malignancy Signal : 0.6971
+
+=================================================================
+SECTION 7 — CLINICAL KNOWLEDGE SUMMARY (DermNet NZ via RAG)
+=================================================================
+  The AI’s top prediction of a common melanocytic nevus (69.7 % confidence) aligns with the typical clinical profile of benign pigmented nevi—well‑circumscribed, uniform color, and stable morphology—as described in DermNet NZ. Key differentials to keep in mind are atypical (dysplastic) nevi, early melanoma (especially if asymmetry, border irregularity, color variation, diameter > 6 mm, or evolution are present), and seborrheic keratosis, which can mimic pigmented lesions. Because the clinical risk assessment is “UNKNOWN” (rule‑based score 0/100, no malignancy probability), a formal in‑office dermoscopic evaluation is warranted; if any atypical features are identified, excisional biopsy with histopathology should be performed. No overt discordance is evident between the image‑based prediction and the absent risk score, but the uncertainty mandates a low‑threshold for further assessment. Management is routine but should be expedited to a standard dermatology appointment rather than emergent.
+
+=================================================================
+SECTION 8 — DIFFERENTIAL DIAGNOSES
+=================================================================
+1. **Atypical (dysplastic) nevus** – a mole that looks a little irregular in shape or color. It can look like a normal mole but may have a higher chance of becoming cancerous, so it needs a closer look.  
+2. **Seborrheic keratosis (benign keratosis)** – a harmless, waxy‑looking growth that can be brown or black. It can be mistaken for a mole because of its color.  
+3. **Melanoma** – a serious skin cancer that can look similar to a regular mole when it is early. It is important to rule this out because it can spread quickly.  
+4. **Vascular lesion** – a birthmark or spot made of blood vessels that may appear red, purple, or dark. It can sometimes be confused with a pigmented mole.  
+5. **Inflammatory lesion** – a spot caused by irritation or infection (e.g., a wart or eczema patch). It may change color and needs to be checked if it looks like a mole.
+
+---
+
+=================================================================
+SECTION 9 — RECOMMENDED INVESTIGATIONS
+=================================================================
+1. **Dermoscopic examination** (use of a handheld skin microscope to see detailed patterns inside the mole).  
+2. **Clinical photography** (taking clear photos of the mole now and later to compare for any change).  
+3. **Excisional biopsy** (surgical removal of the entire mole for laboratory testing) **if** the mole shows any change in size, shape, color, or if the doctor is unsure.  
+4. **Optional: Reflectance confocal microscopy** (non‑invasive imaging that gives a near‑microscopic view of the skin) for borderline cases.  
+5. No blood tests are needed for a simple benign mole.
+
+---
+
+=================================================================
+SECTION 10 — TREATMENT RECOMMENDATIONS
+=================================================================
+- **First‑line:** Watchful waiting. Keep the mole clean and protected from the sun.  
+- **If the mole changes** (gets larger, asymmetrical, has new colors, or starts bleeding), schedule removal. The removal is usually a simple **shave excision** (cutting off the top of the mole) or **full excisional biopsy** (removing the whole mole) performed in the office.  
+- After removal, the tissue will be sent to the lab to confirm it is benign.  
+- Continue to protect all skin with sunscreen and avoid unnecessary trauma to the mole.
+
+---
+
+=================================================================
+SECTION 11 — MEDICATIONS
+=================================================================
+None required at this time. If the mole becomes itchy or irritated, a mild over‑the‑counter hydrocortisone cream (1%) can be applied a few times a day for short‑term relief.
+
+---
+
+=================================================================
+SECTION 12 — THINGS TO AVOID
+=================================================================
+- Direct sun exposure on the mole; wear a wide‑brimmed hat and use sunscreen (SPF 30 or higher) daily.  
+- Tanning beds or artificial UV light.  
+- Picking, scratching, or rubbing the mole.  
+- Harsh chemicals or abrasive skin products on the area.  
+- Prolonged heat (e.g., hot tubs) that could irritate the skin.
+
+---
+
+FOLLOW‑UP SCHEDULE:
+- **Initial follow‑up:** Return in **4 weeks** for a repeat skin check and to review any new photos.  
+- **Routine monitoring:** If the mole remains unchanged, see a dermatologist **every 6–12 months** for a skin exam.  
+- **Urgent review:** Come back sooner (within a few days) if you notice any rapid growth, bleeding, itching, or new colors.
+
+---
+
+=================================================================
+SECTION 13 — FOLLOW-UP SCHEDULE
+=================================================================
+
+
+=================================================================
+SECTION 14 — REFERRAL DECISION
+=================================================================
+Refer to a **board‑certified dermatologist**.  
+- **Urgency:** Routine referral (non‑urgent) unless the mole shows any suspicious change, in which case request an **urgent** appointment.  
+- **Information to include:** Patient’s age and gender (if known), description of the mole (size, location, appearance), dermoscopic images, and any recent changes reported by the patient.
+
+=================================================================
+SECTION 15 — IMPORTANT DISCLAIMER
+=================================================================
+  This report has been generated by MAAI-SkinDx, an AI-assisted
+  dermatological diagnosis system developed at the Insight Centre
+  for Data Analytics, University of Galway.
+
+  This report is intended to SUPPORT clinical decision making by
+  a qualified healthcare professional only. It does NOT replace
+  clinical examination, professional medical judgement, or
+  established diagnostic procedures.
+
+  All AI predictions, risk scores, and recommendations in this
+  report must be verified and acted upon by a qualified clinician.
+
+  System performance: 74.18% macro F1 on 7,734 hold-out test
+  images across 9 disease classes.
+
+  For emergencies contact emergency services immediately.
+  Do not wait for AI assessment in an emergency situation.
+
+  Generated by  : MAAI-SkinDx Expert Agent
+  Institution   : University of Galway, Ireland
+  Supervisor    : Dr. Saeed Alsamhi
+=================================================================

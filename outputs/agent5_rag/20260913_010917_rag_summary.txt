@@ -1,0 +1,16 @@
+MAAI-SkinDx | Agent 5 — RAG Knowledge Summary
+Case ID            : 20260913_010917
+Embedding model    : FremyCompany/BioLORD-2023
+============================================================
+
+PREDICTED CONDITION : Vascular Lesion — blood vessel abnormality
+CLINICAL RISK LEVEL : UNKNOWN
+
+CLINICAL KNOWLEDGE SUMMARY
+  The AI’s top prediction of a vascular lesion (72.8 % confidence) aligns with DermNet descriptions of benign entities such as venous lake or cherry angioma, which are characterized histologically by dilated venules and typically require no biopsy. Key differentials to keep in mind include angiokeratoma, spider telangiectasia, pyogenic granuloma, nodular basal‑cell carcinoma, and amelanotic melanoma, especially when lesions are atypical in color, border, or growth pattern. Given the “UNKNOWN” clinical risk and a rule‑based score of 0/100, the lesion is most likely low‑risk; management can be conservative observation or, if cosmetically undesirable, removal by cryotherapy, laser, or electrocautery. No discordance is evident between the image‑based prediction and the current risk assessment, and the case does not warrant urgent or emergent intervention.
+
+KNOWLEDGE SOURCES (3 chunks retrieved)
+  - https://dermnetnz.org/topics/venous-lake
+  - https://dermnetnz.org/topics/cherry-angioma
+
+============================================================

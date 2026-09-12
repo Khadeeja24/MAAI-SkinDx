@@ -1,0 +1,29 @@
+MAAI-SkinDx | Agent 4 — XAI Explanation
+Case ID            : 20260913_012105
+Explanation source : LLM-generated (Groq LLaMA-3.3-70b)
+============================================================
+
+PREDICTION SUMMARY
+  Predicted condition : Vascular Lesion
+  Confidence          : 72.8%
+  Clinical urgency    : LOW — Benign. Routine assessment advised.
+
+VISUAL EXPLANATION
+  The Grad‑CAM map shows the model’s highest activation concentrated at the lesion’s periphery (row 0, column 4) with a narrowly focused spread (0.20), indicating that it identified a sharply demarcated, erythematous border and peripheral vascular structures typical of benign vascular proliferations such as hemangioma or spider angioma. This border‑centric pattern is clinically relevant because vascular lesions often present with well‑defined, raised edges and a uniform color gradient that distinguish them from inflammatory or pigmented entities. The AI’s 72.8 % confidence, together with the absence of diffuse internal heterogeneity, supports a benign diagnosis and suggests routine clinical observation or dermoscopic confirmation rather than immediate biopsy. If the lesion exhibits any change in size, color, or symptomatology, escalation to a skin‑cancer work‑up would be warranted.
+
+HEATMAP INTERPRETATION
+  Red / warm regions  : high importance to prediction
+  Blue / cool regions : low importance
+
+  Focus pattern     : Focus On Border
+  Peak location     : row 0, col 4 (7x7 grid)
+  Activation spread : 0.2014
+  Max activation    : 1.0000
+
+IMPORTANT NOTICE
+  This AI explanation supports clinical decision
+  making. It does not replace it. A clinician must
+  verify the highlighted regions align with their
+  own clinical assessment before acting.
+
+============================================================

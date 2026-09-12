@@ -1,0 +1,15 @@
+MAAI-SkinDx | Agent 5 — RAG Knowledge Summary
+Case ID            : 20260913_015154
+Embedding model    : FremyCompany/BioLORD-2023
+============================================================
+
+PREDICTED CONDITION : Melanocytic Nevus — common benign mole
+CLINICAL RISK LEVEL : CRITICAL
+
+CLINICAL KNOWLEDGE SUMMARY
+  The AI’s top prediction of a common melanocytic nevus (67 % confidence) aligns with typical dermoscopic features of uniform pigment, symmetry and regular borders described for benign naevi, but the concurrent clinical risk score (100/100) and a 90.9 % malignancy probability indicate a discordant, high‑risk assessment. Key differentials to exclude include melanoma (especially superficial spreading or nodular), dysplastic/atypical nevus, pigmented basal cell carcinoma, and early squamous cell carcinoma. Given the CRITICAL risk designation, urgent full‑thickness excisional biopsy (or incisional if lesion size precludes excision) with narrow margins and prompt histopathologic review is warranted, followed by referral to a melanoma specialist. The marked discordance between image‑based benign prediction and clinical risk mandates immediate action rather than observation.
+
+KNOWLEDGE SOURCES (2 chunks retrieved)
+  - https://dermnetnz.org/topics/melanocytic-naevus
+
+============================================================

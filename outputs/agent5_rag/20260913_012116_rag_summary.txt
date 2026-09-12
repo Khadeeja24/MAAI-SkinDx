@@ -1,0 +1,15 @@
+MAAI-SkinDx | Agent 5 — RAG Knowledge Summary
+Case ID            : 20260913_012116
+Embedding model    : FremyCompany/BioLORD-2023
+============================================================
+
+PREDICTED CONDITION : Melanocytic Nevus — common benign mole
+CLINICAL RISK LEVEL : UNKNOWN
+
+CLINICAL KNOWLEDGE SUMMARY
+  The AI’s top prediction of a common melanocytic nevus (69.7% confidence) aligns with DermNet NZ’s description of typical benign pigmented nevi, which are usually symmetric, uniform in color, and have well‑defined borders. Key differentials to keep in mind are a seborrheic keratosis (especially if a stuck‑on appearance is noted), early melanoma (particularly if there is asymmetry, color variegation, or evolution), a vascular lesion, and an inflammatory papule. Given the rule‑based risk score of 0/100 and the absence of any high‑risk clinical flags, the lesion can be managed conservatively with routine dermoscopic surveillance and patient education on the ABCDE criteria; excision is reserved for any change or atypical features on follow‑up. No discordance between the image‑based prediction and the clinical risk assessment is evident, and the urgency is low (routine follow‑up rather than urgent referral).
+
+KNOWLEDGE SOURCES (2 chunks retrieved)
+  - https://dermnetnz.org/topics/melanocytic-naevus
+
+============================================================

@@ -1,0 +1,29 @@
+MAAI-SkinDx | Agent 4 — XAI Explanation
+Case ID            : 20260913_010648
+Explanation source : LLM-generated (Groq LLaMA-3.3-70b)
+============================================================
+
+PREDICTION SUMMARY
+  Predicted condition : Melanocytic Nevus
+  Confidence          : 67.6%
+  Clinical urgency    : LOW — Benign. Routine monitoring advised.
+
+VISUAL EXPLANATION
+  The Grad‑CAM map shows that the network’s highest activation (peak at row 3, column 3 of the 7 × 7 grid) is tightly concentrated within the central portion of the lesion (activation spread 0.256), indicating that the AI identified homogeneous melanin distribution, smooth, well‑circumscribed borders, and symmetric architecture—hallmarks of a benign melanocytic nevus. These visual cues differentiate the lesion from the irregular pigmentation, asymmetry, or ulceration that would suggest dysplastic or malignant melanoma. Because the model assigns a 67.6 % probability to a benign nevus and no malignant features are highlighted, routine clinical management (clinical observation and patient education on self‑monitoring) is appropriate unless the lesion demonstrates change over time. If any evolution (color, size, border) occurs, excisional biopsy should be considered.
+
+HEATMAP INTERPRETATION
+  Red / warm regions  : high importance to prediction
+  Blue / cool regions : low importance
+
+  Focus pattern     : Focus On Lesion
+  Peak location     : row 3, col 3 (7x7 grid)
+  Activation spread : 0.2561
+  Max activation    : 1.0000
+
+IMPORTANT NOTICE
+  This AI explanation supports clinical decision
+  making. It does not replace it. A clinician must
+  verify the highlighted regions align with their
+  own clinical assessment before acting.
+
+============================================================

@@ -1,0 +1,27 @@
+MAAI-SkinDx | Agent 4 — XAI Explanation
+Case ID   : 20260728_222058
+============================================================
+
+PREDICTION SUMMARY
+  Predicted condition : Vascular Lesion
+  Confidence          : 72.8%
+  Clinical urgency    : LOW — Benign. Routine assessment advised.
+
+VISUAL EXPLANATION
+  The model detected characteristic vascular border patterns consistent with a benign vascular abnormality.
+
+HEATMAP INTERPRETATION
+  The heatmap overlay shows which regions of the image most
+  influenced the AI prediction.
+    Red / warm regions  : high importance to this prediction
+    Blue / cool regions : low importance — largely ignored
+
+  Focus pattern detected : Focus On Border
+
+IMPORTANT NOTICE
+  This AI explanation is intended to support clinical decision
+  making, not replace it. A clinician should verify that the
+  highlighted regions align with their own clinical assessment
+  before acting on this prediction.
+
+============================================================

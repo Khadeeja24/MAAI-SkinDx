@@ -1,0 +1,27 @@
+MAAI-SkinDx | Agent 4 — XAI Explanation
+Case ID   : 20260728_220225
+============================================================
+
+PREDICTION SUMMARY
+  Predicted condition : Melanocytic Nevus
+  Confidence          : 67.6%
+  Clinical urgency    : LOW — Benign. Routine monitoring advised.
+
+VISUAL EXPLANATION
+  The model focused on the central pigmentation pattern, identifying regular symmetric features consistent with a benign melanocytic nevus (common mole).
+
+HEATMAP INTERPRETATION
+  The heatmap overlay shows which regions of the image most
+  influenced the AI prediction.
+    Red / warm regions  : high importance to this prediction
+    Blue / cool regions : low importance — largely ignored
+
+  Focus pattern detected : Focus On Lesion
+
+IMPORTANT NOTICE
+  This AI explanation is intended to support clinical decision
+  making, not replace it. A clinician should verify that the
+  highlighted regions align with their own clinical assessment
+  before acting on this prediction.
+
+============================================================

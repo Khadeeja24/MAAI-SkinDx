@@ -1,0 +1,15 @@
+MAAI-SkinDx | Agent 5 — RAG Knowledge Summary
+Case ID   : 20260822_222551
+============================================================
+
+PREDICTED CONDITION : Melanocytic Nevus — common benign mole
+CLINICAL RISK LEVEL : UNKNOWN
+
+CLINICAL KNOWLEDGE SUMMARY
+  The AI’s top prediction of a common melanocytic nevus aligns with the typical clinical and dermoscopic features described in DermNet NZ (uniform colour, symmetric shape, ≤ 6 mm, stable appearance), but the modest 67 % confidence warrants verification. Key differentials include a dysplastic/atypical nevus, early melanoma (especially if ABCDE criteria are met), seborrheic keratosis, and inflammatory dermatoses that can mimic pigmented lesions. For a lesion that is clinically benign and stable, routine skin‑self‑examination with periodic (6‑12 month) photographic or dermoscopic monitoring is appropriate; any change in size, shape, colour, border, symptomatology, or the emergence of a new lesion after age 40 should prompt full‑field dermoscopy and consideration of excisional biopsy. Flag any “ugly‑duckling” appearance, rapid evolution, ulceration, or symptomatic change as a clinical concern that overrides the AI’s benign probability and necessitates prompt histopathologic assessment.
+
+KNOWLEDGE SOURCES
+  Chunks retrieved : 5
+  - https://dermnetnz.org/topics/melanocytic-naevus
+
+============================================================

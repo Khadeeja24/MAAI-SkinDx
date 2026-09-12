@@ -1,0 +1,16 @@
+MAAI-SkinDx | Agent 5 — RAG Knowledge Summary
+Case ID   : 20260822_222607
+============================================================
+
+PREDICTED CONDITION : Vascular Lesion — blood vessel abnormality
+CLINICAL RISK LEVEL : UNKNOWN
+
+CLINICAL KNOWLEDGE SUMMARY
+  The AI’s 72.8 % probability of a vascular lesion is consistent with common benign entities such as cherry (senile) angioma or pyogenic granuloma, both of which are proliferations of capillary endothelium and typically present as well‑demarcated, red‑purple papules. Key differentials to keep in mind are amelanotic melanoma, Kaposi sarcoma, bacillary angiomatosis, and early squamous‑cell carcinoma, especially when lesions are rapidly enlarging, ulcerated, or display atypical dermoscopic patterns. For a clinically typical, asymptomatic lesion the usual approach is reassurance and periodic observation; any signs of rapid change, bleeding, ulceration, or atypical border morphology (as suggested by the Grad‑CAM focus on the periphery) should prompt dermoscopic evaluation and, if warranted, an excisional or punch biopsy. Given the unknown clinical risk level, vigilance for systemic symptoms (e.g., fever, weight loss) or immunosuppression is advisable, as these may herald infectious or malignant mimickers.
+
+KNOWLEDGE SOURCES
+  Chunks retrieved : 5
+  - https://dermnetnz.org/topics/pyogenic-granuloma
+  - https://dermnetnz.org/topics/cherry-angioma
+
+============================================================
