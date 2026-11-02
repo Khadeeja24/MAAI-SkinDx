@@ -143,14 +143,18 @@ model = RandomForestClassifier(
     n_jobs         = -1,
 )
 
-# ── 5-fold cross-validation ───────────────────────────────────────
-print("\n── 5-Fold Cross-Validation ──")
-skf    = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-f1_scores  = cross_val_score(model, X, y, cv=skf,
+# ── 5-fold cross-validation (patient-level) ───────────────────────
+print("\n── 5-Fold Cross-Validation (patient-level split) ──")
+from sklearn.model_selection import StratifiedGroupKFold
+
+groups = df["patient_id"].values  # keep all images of one patient together
+
+skf    = StratifiedGroupKFold(n_splits=5)
+f1_scores  = cross_val_score(model, X, y, cv=skf, groups=groups,
                               scoring="f1", n_jobs=-1)
-auc_scores = cross_val_score(model, X, y, cv=skf,
+auc_scores = cross_val_score(model, X, y, cv=skf, groups=groups,
                               scoring="roc_auc", n_jobs=-1)
-acc_scores = cross_val_score(model, X, y, cv=skf,
+acc_scores = cross_val_score(model, X, y, cv=skf, groups=groups,
                               scoring="accuracy", n_jobs=-1)
 
 print(f"  F1 Score : {f1_scores.mean()*100:.2f}% "

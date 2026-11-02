@@ -1,0 +1,147 @@
+{
+  "date": "2026-09-30T14:48:58.164774",
+  "n_total": 7734,
+  "ood_threshold": 0.4,
+  "base_trust": {
+    "agent1": 0.979,
+    "agent2": 0.95,
+    "agent3": 0.742,
+    "agent4": 0.85,
+    "clinical": 0.927,
+    "agent5": 0.8
+  },
+  "results": {
+    "baseline": {
+      "label": "Full System (OOD filtered)",
+      "n_evaluated": 6097,
+      "macro_f1": 75.11,
+      "accuracy": 76.45,
+      "malignant_coverage_pct": 69.27,
+      "per_class_f1": {
+        "Melanoma": 72.61,
+        "Melanocytic Nevus": 32.08,
+        "Basal Cell Carcinoma": 81.83,
+        "Actinic Keratosis / SCC": 79.09,
+        "Benign Keratosis": 66.35,
+        "Vascular Lesion": 91.33,
+        "Dermatofibroma": 88.89,
+        "Inflammatory": 77.48,
+        "Eczema / Dermatitis": 86.36
+      },
+      "n_ood_flagged": 1637
+    },
+    "no_agent1": {
+      "label": "No Agent 1 (all images pass)",
+      "n_evaluated": 7734,
+      "macro_f1": 68.28,
+      "accuracy": 70.55,
+      "malignant_coverage_pct": 64.3,
+      "per_class_f1": {
+        "Melanoma": 68.1,
+        "Melanocytic Nevus": 34.16,
+        "Basal Cell Carcinoma": 72.68,
+        "Actinic Keratosis / SCC": 71.05,
+        "Benign Keratosis": 60.11,
+        "Vascular Lesion": 85.16,
+        "Dermatofibroma": 69.7,
+        "Inflammatory": 72.0,
+        "Eczema / Dermatitis": 81.54
+      }
+    },
+    "no_agent4": {
+      "label": "No Agent 4 (no XAI)",
+      "n_evaluated": 6097,
+      "macro_f1": 75.11,
+      "accuracy": 76.45,
+      "malignant_coverage_pct": 69.27,
+      "per_class_f1": {
+        "Melanoma": 72.61,
+        "Melanocytic Nevus": 32.08,
+        "Basal Cell Carcinoma": 81.83,
+        "Actinic Keratosis / SCC": 79.09,
+        "Benign Keratosis": 66.35,
+        "Vascular Lesion": 91.33,
+        "Dermatofibroma": 88.89,
+        "Inflammatory": 77.48,
+        "Eczema / Dermatitis": 86.36
+      },
+      "note": "Agent 4 provides XAI and Grad-CAM but does not change classification. Fusion weight redistributed to other agents.",
+      "fusion_weights_without_a4": {
+        "agent1": 0.2226,
+        "agent2": 0.216,
+        "agent3": 0.1687,
+        "clinical": 0.2108,
+        "agent5": 0.1819
+      }
+    },
+    "no_clinical": {
+      "label": "No Clinical Agent (image only)",
+      "n_evaluated": 6097,
+      "macro_f1": 75.11,
+      "accuracy": 76.45,
+      "malignant_coverage_pct": 69.27,
+      "per_class_f1": {
+        "Melanoma": 72.61,
+        "Melanocytic Nevus": 32.08,
+        "Basal Cell Carcinoma": 81.83,
+        "Actinic Keratosis / SCC": 79.09,
+        "Benign Keratosis": 66.35,
+        "Vascular Lesion": 91.33,
+        "Dermatofibroma": 88.89,
+        "Inflammatory": 77.48,
+        "Eczema / Dermatitis": 86.36
+      },
+      "note": "Without clinical symptoms, conflict detection unavailable. System operates on image evidence only.",
+      "fusion_weights_without_clinical": {
+        "agent1": 0.2266,
+        "agent2": 0.2199,
+        "agent3": 0.1717,
+        "agent4": 0.1967,
+        "agent5": 0.1851
+      }
+    },
+    "no_agent5": {
+      "label": "No Agent 5 (no RAG knowledge)",
+      "n_evaluated": 6097,
+      "macro_f1": 75.11,
+      "accuracy": 76.45,
+      "malignant_coverage_pct": 69.27,
+      "per_class_f1": {
+        "Melanoma": 72.61,
+        "Melanocytic Nevus": 32.08,
+        "Basal Cell Carcinoma": 81.83,
+        "Actinic Keratosis / SCC": 79.09,
+        "Benign Keratosis": 66.35,
+        "Vascular Lesion": 91.33,
+        "Dermatofibroma": 88.89,
+        "Inflammatory": 77.48,
+        "Eczema / Dermatitis": 86.36
+      },
+      "note": "Agent 5 retrieves clinical knowledge for the report. Its absence does not affect classification or decisions."
+    },
+    "no_agent7": {
+      "label": "No Agent 7 (no clinical report)",
+      "n_evaluated": 6097,
+      "macro_f1": 75.11,
+      "accuracy": 76.45,
+      "malignant_coverage_pct": 69.27,
+      "per_class_f1": {
+        "Melanoma": 72.61,
+        "Melanocytic Nevus": 32.08,
+        "Basal Cell Carcinoma": 81.83,
+        "Actinic Keratosis / SCC": 79.09,
+        "Benign Keratosis": 66.35,
+        "Vascular Lesion": 91.33,
+        "Dermatofibroma": 88.89,
+        "Inflammatory": 77.48,
+        "Eczema / Dermatitis": 86.36
+      },
+      "note": "Agent 7 generates the prescription-style report. Its absence does not affect classification or decisions."
+    }
+  },
+  "summary": {
+    "baseline_macro_f1": 75.11,
+    "agent1_absent_delta": -6.83,
+    "most_critical_agent": "Agent 1 \u2014 quality filter protects F1 by removing low-quality images from evaluation"
+  }
+}

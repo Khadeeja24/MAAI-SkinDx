@@ -2,11 +2,7 @@
 # MAAI-SkinDx | Agent 7 Expert — Clinical Expert Agent
 # ══════════════════════════════════════════════════════════════════
 # Final agent in the MAAI-SkinDx pipeline.
-# Generates a complete 15-section doctor-style clinical report.
-#
-# Sections 1-7  : Template-based (deterministic)
-# Sections 8-14 : LLM-generated (openai/gpt-oss-120b)
-# Section 15    : Disclaimer (deterministic)
+# Generates a doctor prescription-style clinical report.
 # ══════════════════════════════════════════════════════════════════
 
 import os
@@ -31,6 +27,9 @@ try:
     GROQ_AVAILABLE = True
 except ImportError:
     GROQ_AVAILABLE = False
+
+# Pox class index offset — must match Orchestrator
+POX_INDEX_OFFSET = 100
 
 
 class ClinicalExpertAgent:
@@ -61,16 +60,6 @@ class ClinicalExpertAgent:
     # ── Section parser ─────────────────────────────────────────────
 
     def _parse_sections(self, raw: str) -> dict:
-        """
-        Parse LLM output into 7 clinical sections.
-
-        Robust against markdown formatting the LLM may add
-        despite instructions — strips hash symbols, asterisks,
-        and handles spacing variations.
-
-        Returns dict with 7 keys. Returns None if fewer than
-        3 sections are filled, signalling fallback needed.
-        """
         sections = {
             "differential_diagnoses"    : "",
             "recommended_investigations": "",
@@ -81,8 +70,6 @@ class ClinicalExpertAgent:
             "referral_decision"         : "",
         }
 
-        # Keyword to key mapping
-        # Using startswith on uppercase so partial matches work
         header_map = [
             ("DIFFERENTIAL DIAGNOS", "differential_diagnoses"),
             ("RECOMMENDED INVEST",   "recommended_investigations"),
@@ -97,16 +84,12 @@ class ClinicalExpertAgent:
         current_lines = []
 
         for line in raw.split("\n"):
-            # Strip markdown that LLM adds despite instructions
-            clean = line.strip()
-            clean = clean.lstrip("#").strip()
-            clean = clean.strip("*").strip()
+            clean       = line.strip().lstrip("#").strip().strip("*").strip()
             clean_upper = clean.upper().rstrip(":")
 
             matched = False
             for keyword, key in header_map:
                 if clean_upper.startswith(keyword):
-                    # Save previous section
                     if current_key is not None:
                         sections[current_key] = "\n".join(
                             current_lines).strip()
@@ -118,13 +101,11 @@ class ClinicalExpertAgent:
             if not matched and current_key is not None:
                 current_lines.append(line)
 
-        # Save last section
         if current_key is not None:
             sections[current_key] = "\n".join(
                 current_lines).strip()
 
-        filled = sum(
-            1 for v in sections.values() if v.strip())
+        filled = sum(1 for v in sections.values() if v.strip())
         print(f"  [Agent 7] Sections filled: {filled}/7")
 
         if filled < 3:
@@ -154,10 +135,14 @@ class ClinicalExpertAgent:
         urgency         : str,
         symptoms        : dict,
     ) -> dict:
-        """
-        Generate Sections 8-14 using Groq LLM.
-        Falls back to templates if LLM fails or parsing fails.
-        """
+        # Pox cases — always use fallback templates
+        if predicted_index >= POX_INDEX_OFFSET:
+            print(f"  [Agent 7] Pox case detected "
+                  f"— using pox fallback templates")
+            return self._fallback_sections(
+                predicted_name, predicted_index,
+                risk_level, decision, urgency)
+
         if self.client is None:
             print(f"  [Agent 7] No LLM client — using fallback")
             return self._fallback_sections(
@@ -166,14 +151,12 @@ class ClinicalExpertAgent:
 
         is_malignant = predicted_index in MALIGNANT_CLASSES
 
-        # Build top 5 string
         top5_str = "\n".join([
             f"  {p['rank']}. {p['class_name']} "
             f"({p['confidence_pct']})"
             for p in (top_5 or [])[:5]
         ])
 
-        # Build risk factors string
         factors_str = (
             "\n".join(f"  {i+1}. {f}"
                       for i, f in enumerate(risk_factors or []))
@@ -191,7 +174,6 @@ class ClinicalExpertAgent:
         gender = str(sym.get("gender", "Not provided"))
         region = str(sym.get("region", "Not provided"))
 
-        # Urgency-aware treatment instruction
         if decision in ("ESCALATE", "REFER_URGENT"):
             treatment_instruction = (
                 "This is an URGENT case. "
@@ -273,7 +255,6 @@ class ClinicalExpertAgent:
             )
             raw = response.choices[0].message.content.strip()
 
-            # Show first 400 chars for debugging
             print(f"  [Agent 7] LLM preview: "
                   f"{raw[:400].replace(chr(10), ' | ')}")
 
@@ -301,14 +282,251 @@ class ClinicalExpertAgent:
         decision       : str,
         urgency        : str,
     ) -> dict:
-        """
-        Evidence-based template fallback when LLM unavailable
-        or when parser finds fewer than 3 sections.
-        """
         is_malignant = predicted_index in MALIGNANT_CLASSES
         is_urgent    = decision in (
             "ESCALATE", "REFER_URGENT", "REVIEW")
+        is_pox       = predicted_index >= POX_INDEX_OFFSET
 
+        # ── Pox family templates ───────────────────────────────────
+        if is_pox:
+            pox_name = predicted_name
+
+            if "Monkeypox" in pox_name or "Mpox" in pox_name:
+                return {
+                    "differential_diagnoses": (
+                        "1. Monkeypox (Mpox) — the main AI prediction.\n"
+                        "2. Chickenpox (varicella) — similar blister "
+                        "pattern, more superficial lesions.\n"
+                        "3. Smallpox — now eradicated but historically "
+                        "similar in appearance.\n"
+                        "4. Herpes simplex — clustered blisters, "
+                        "typically in one area.\n"
+                        "5. Syphilis — secondary stage can produce "
+                        "a widespread rash."
+                    ),
+                    "recommended_investigations": (
+                        "1. PCR swab of lesion fluid — the confirmatory "
+                        "test for Monkeypox.\n"
+                        "2. Full clinical examination by an infectious "
+                        "disease specialist.\n"
+                        "3. Blood tests to check immune status.\n"
+                        "4. Contact tracing of all close contacts."
+                    ),
+                    "treatment_recommendations": (
+                        "1. Isolate from other people immediately — "
+                        "Monkeypox is contagious through close contact.\n"
+                        "2. Seek medical attention within 24 hours.\n"
+                        "3. Antiviral medication (tecovirimat) may be "
+                        "prescribed by the specialist.\n"
+                        "4. Keep lesions clean and covered.\n"
+                        "5. Do not pop or scratch blisters."
+                    ),
+                    "medications": (
+                        "Tecovirimat (antiviral) may be prescribed by "
+                        "the specialist for severe cases.\n"
+                        "Pain relief: paracetamol or ibuprofen for "
+                        "fever and discomfort.\n"
+                        "Antiseptic cream to keep lesions clean "
+                        "and prevent secondary infection."
+                    ),
+                    "things_to_avoid": (
+                        "1. Avoid close physical contact with other "
+                        "people until all lesions have healed.\n"
+                        "2. Do not share bedding, towels or clothing.\n"
+                        "3. Do not attend work, school or public places.\n"
+                        "4. Avoid contact with animals — Monkeypox can "
+                        "spread to pets.\n"
+                        "5. Do not pop or scratch the blisters."
+                    ),
+                    "followup_schedule": (
+                        "Within 24 hours: Attend infectious disease "
+                        "clinic or emergency department.\n"
+                        "Week 1 to 4: Isolation at home until all lesions "
+                        "have fully crusted and healed.\n"
+                        "Ongoing: Follow public health guidance on "
+                        "contact notification."
+                    ),
+                    "referral_decision": (
+                        "URGENT referral to an Infectious Disease "
+                        "specialist or Public Health unit within 24 hours.\n"
+                        "Monkeypox is a notifiable disease — the clinic "
+                        "will inform public health authorities."
+                    ),
+                }
+
+            elif "Chickenpox" in pox_name:
+                return {
+                    "differential_diagnoses": (
+                        "1. Chickenpox (varicella) — the main AI prediction.\n"
+                        "2. Monkeypox — deeper lesions, more uniform size.\n"
+                        "3. Herpes zoster (shingles) — follows nerve "
+                        "distribution, usually one side of body.\n"
+                        "4. Insect bites — scattered itchy bumps, "
+                        "not in crops.\n"
+                        "5. Hand-foot-mouth disease — lesions mainly "
+                        "on palms, soles, and inside mouth."
+                    ),
+                    "recommended_investigations": (
+                        "1. Clinical diagnosis is usually sufficient "
+                        "based on the characteristic rash.\n"
+                        "2. PCR swab of lesion fluid if diagnosis "
+                        "is uncertain.\n"
+                        "3. Check vaccination history."
+                    ),
+                    "treatment_recommendations": (
+                        "1. Rest at home — chickenpox is contagious "
+                        "until all blisters have crusted over.\n"
+                        "2. Antiviral medication (acyclovir) may be "
+                        "prescribed for adults or immunocompromised "
+                        "patients.\n"
+                        "3. Keep skin clean and cool.\n"
+                        "4. Cut fingernails short to prevent scratching."
+                    ),
+                    "medications": (
+                        "Antihistamine (cetirizine or loratadine) for "
+                        "itching relief.\n"
+                        "Paracetamol for fever — do NOT give aspirin "
+                        "to children.\n"
+                        "Calamine lotion applied gently to itchy lesions.\n"
+                        "Acyclovir antiviral — only if prescribed by "
+                        "a specialist for high-risk patients."
+                    ),
+                    "things_to_avoid": (
+                        "1. Avoid contact with pregnant women, newborns "
+                        "and immunocompromised people.\n"
+                        "2. Do not scratch — this causes scarring and "
+                        "risk of secondary infection.\n"
+                        "3. Avoid school or work until fully crusted.\n"
+                        "4. Avoid aspirin — risk of Reye syndrome "
+                        "in children."
+                    ),
+                    "followup_schedule": (
+                        "Stay home until all blisters have crusted "
+                        "over — usually 5 to 7 days from onset.\n"
+                        "Return to clinic if fever persists beyond "
+                        "4 days or new symptoms develop.\n"
+                        "Routine review after recovery."
+                    ),
+                    "referral_decision": (
+                        "Routine GP or dermatology review.\n"
+                        "URGENT referral if: immunocompromised patient, "
+                        "pregnant, severe rash, or signs of infection."
+                    ),
+                }
+
+            elif "Measles" in pox_name:
+                return {
+                    "differential_diagnoses": (
+                        "1. Measles — the main AI prediction.\n"
+                        "2. Rubella (German measles) — milder rash, "
+                        "less fever.\n"
+                        "3. Roseola — high fever then rash, mainly "
+                        "in young children.\n"
+                        "4. Scarlet fever — sandpaper texture rash "
+                        "with sore throat.\n"
+                        "5. Drug reaction rash — history of new "
+                        "medication is the key clue."
+                    ),
+                    "recommended_investigations": (
+                        "1. Blood test for measles IgM antibody — "
+                        "confirmatory test.\n"
+                        "2. Check vaccination history — MMR vaccine.\n"
+                        "3. Clinical examination for Koplik spots "
+                        "inside the mouth.\n"
+                        "4. Notify public health — measles is a "
+                        "notifiable disease."
+                    ),
+                    "treatment_recommendations": (
+                        "1. Rest and isolation — measles is highly "
+                        "contagious.\n"
+                        "2. Vitamin A supplementation is recommended "
+                        "for all measles cases.\n"
+                        "3. Supportive care — fluids, fever management.\n"
+                        "4. Seek medical attention promptly — measles "
+                        "can cause serious complications."
+                    ),
+                    "medications": (
+                        "Vitamin A: given as two doses on consecutive "
+                        "days — reduces complications significantly.\n"
+                        "Paracetamol for fever and discomfort.\n"
+                        "Antibiotics only if secondary bacterial "
+                        "infection is confirmed by the doctor."
+                    ),
+                    "things_to_avoid": (
+                        "1. Avoid all contact with unvaccinated people, "
+                        "pregnant women and immunocompromised individuals.\n"
+                        "2. Avoid public places for at least 4 days "
+                        "after rash onset.\n"
+                        "3. Avoid school or work during isolation period."
+                    ),
+                    "followup_schedule": (
+                        "Within 24 hours: Attend clinic for "
+                        "confirmation and management plan.\n"
+                        "Isolation for at least 4 days after "
+                        "rash onset.\n"
+                        "Ongoing: Monitor for complications including "
+                        "pneumonia and encephalitis."
+                    ),
+                    "referral_decision": (
+                        "URGENT referral to infectious disease or "
+                        "paediatrics if complications are suspected.\n"
+                        "Notify public health authority — measles "
+                        "is a notifiable disease."
+                    ),
+                }
+
+            else:
+                # Cowpox or HFMD — generic pox fallback
+                return {
+                    "differential_diagnoses": (
+                        f"1. {pox_name} — the main AI prediction.\n"
+                        "2. Chickenpox — widespread vesicular rash.\n"
+                        "3. Contact dermatitis — localised skin reaction.\n"
+                        "4. Herpes simplex — clustered blisters.\n"
+                        "5. Insect bites — scattered itchy lesions."
+                    ),
+                    "recommended_investigations": (
+                        "1. Clinical examination by a doctor "
+                        "for confirmation.\n"
+                        "2. Swab of lesion fluid for PCR if "
+                        "diagnosis is uncertain.\n"
+                        "3. Vaccination history review."
+                    ),
+                    "treatment_recommendations": (
+                        "1. Seek medical attention for clinical "
+                        "confirmation of diagnosis.\n"
+                        "2. Keep lesions clean and covered.\n"
+                        "3. Avoid spreading to other people "
+                        "through close contact.\n"
+                        "4. Follow the treating doctor's instructions."
+                    ),
+                    "medications": (
+                        "Paracetamol for pain and fever.\n"
+                        "Antiseptic cream to prevent secondary "
+                        "infection.\n"
+                        "Specific antivirals only if prescribed "
+                        "by the treating doctor."
+                    ),
+                    "things_to_avoid": (
+                        "1. Avoid close contact with others "
+                        "until confirmed by a doctor.\n"
+                        "2. Do not scratch or pop lesions.\n"
+                        "3. Avoid sharing personal items."
+                    ),
+                    "followup_schedule": (
+                        "Attend clinic within 48 hours for "
+                        "clinical confirmation.\n"
+                        "Follow up as directed by the treating doctor."
+                    ),
+                    "referral_decision": (
+                        "GP or dermatology referral within 48 hours "
+                        "for clinical confirmation.\n"
+                        "Urgent referral if spreading rapidly or "
+                        "patient is immunocompromised."
+                    ),
+                }
+
+        # ── Malignant / urgent template ────────────────────────────
         if is_malignant or is_urgent:
             return {
                 "differential_diagnoses": (
@@ -375,60 +593,61 @@ class ClinicalExpertAgent:
                     "ML malignancy probability of 89%."
                 ),
             }
-        else:
-            return {
-                "differential_diagnoses": (
-                    f"1. {predicted_name} — the main AI prediction.\n"
-                    "2. Inflammatory skin condition (redness and "
-                    "irritation from skin inflammation).\n"
-                    "3. Contact dermatitis (skin reaction to "
-                    "something that touched the skin).\n"
-                    "4. Benign keratosis (a harmless thickened "
-                    "patch of skin, very common in adults)."
-                ),
-                "recommended_investigations": (
-                    "1. Dermoscopy (a magnified examination of the "
-                    "lesion by a dermatologist).\n"
-                    "2. Photographic monitoring (a photograph taken "
-                    "today for comparison at future visits).\n"
-                    "3. Patch testing if a skin allergy is suspected."
-                ),
-                "treatment_recommendations": (
-                    "No urgent treatment is needed at this stage.\n"
-                    "A routine skin check with a dermatologist is "
-                    "recommended.\n"
-                    "If the lesion changes in size, shape or colour, "
-                    "or starts to bleed or itch more, attend the "
-                    "clinic sooner than scheduled."
-                ),
-                "medications": (
-                    "No prescription medicines are required at "
-                    "this stage.\n"
-                    "A simple moisturising cream may be used if "
-                    "the skin around the lesion feels dry."
-                ),
-                "things_to_avoid": (
-                    "1. Avoid prolonged direct sun exposure on "
-                    "the affected area.\n"
-                    "2. Apply sunscreen SPF 30 or higher every day.\n"
-                    "3. Avoid scratching or picking at the lesion.\n"
-                    "4. Avoid harsh soaps or chemical skin products "
-                    "on the area."
-                ),
-                "followup_schedule": (
-                    "Routine dermatologist review in 6 to 12 months.\n"
-                    "Check the lesion yourself every month at home.\n"
-                    "Come back sooner if you notice any change in "
-                    "size, shape, colour, or if it starts to bleed."
-                ),
-                "referral_decision": (
-                    "Routine referral to Dermatology for a "
-                    "standard follow-up skin check.\n"
-                    "No urgent referral is required at this stage."
-                ),
-            }
 
-    # ── Report assembly ────────────────────────────────────────────
+        # ── Benign / routine template ──────────────────────────────
+        return {
+            "differential_diagnoses": (
+                f"1. {predicted_name} — the main AI prediction.\n"
+                "2. Inflammatory skin condition (redness and "
+                "irritation from skin inflammation).\n"
+                "3. Contact dermatitis (skin reaction to "
+                "something that touched the skin).\n"
+                "4. Benign keratosis (a harmless thickened "
+                "patch of skin, very common in adults)."
+            ),
+            "recommended_investigations": (
+                "1. Dermoscopy (a magnified examination of the "
+                "lesion by a dermatologist).\n"
+                "2. Photographic monitoring (a photograph taken "
+                "today for comparison at future visits).\n"
+                "3. Patch testing if a skin allergy is suspected."
+            ),
+            "treatment_recommendations": (
+                "No urgent treatment is needed at this stage.\n"
+                "A routine skin check with a dermatologist is "
+                "recommended.\n"
+                "If the lesion changes in size, shape or colour, "
+                "or starts to bleed or itch more, attend the "
+                "clinic sooner than scheduled."
+            ),
+            "medications": (
+                "No prescription medicines are required at "
+                "this stage.\n"
+                "A simple moisturising cream may be used if "
+                "the skin around the lesion feels dry."
+            ),
+            "things_to_avoid": (
+                "1. Avoid prolonged direct sun exposure on "
+                "the affected area.\n"
+                "2. Apply sunscreen SPF 30 or higher every day.\n"
+                "3. Avoid scratching or picking at the lesion.\n"
+                "4. Avoid harsh soaps or chemical skin products "
+                "on the area."
+            ),
+            "followup_schedule": (
+                "Routine dermatologist review in 6 to 12 months.\n"
+                "Check the lesion yourself every month at home.\n"
+                "Come back sooner if you notice any change in "
+                "size, shape, colour, or if it starts to bleed."
+            ),
+            "referral_decision": (
+                "Routine referral to Dermatology for a "
+                "standard follow-up skin check.\n"
+                "No urgent referral is required at this stage."
+            ),
+        }
+
+    # ── Report assembly — Prescription Style ───────────────────────
 
     def _assemble_report(
         self,
@@ -457,24 +676,18 @@ class ClinicalExpertAgent:
         fused_malignancy  : float,
     ) -> str:
 
-        now        = datetime.now()
-        date_str   = now.strftime("%d %B %Y")
-        time_str   = now.strftime("%H:%M")
-        is_mal     = predicted_index in MALIGNANT_CLASSES
-        class_type = "MALIGNANT" if is_mal else "Benign"
-        urgency_label = URGENCY_LABELS.get(urgency, urgency)
+        now      = datetime.now()
+        date_str = now.strftime("%d %B %Y")
+        time_str = now.strftime("%H:%M")
+        is_mal   = predicted_index in MALIGNANT_CLASSES
+        is_pox   = predicted_index >= POX_INDEX_OFFSET
 
-        sym = symptoms or {}
+        sym    = symptoms or {}
         age    = str(sym.get("age",    "Not provided"))
         gender = str(sym.get("gender", "Not provided"))
         region = str(sym.get("region", "Not provided"))
-        fitz   = sym.get("fitspatrick")
-        fitz_label = (
-            FITZPATRICK_LABELS.get(int(fitz), str(fitz))
-            if fitz else "Not provided"
-        )
 
-        # Symptoms
+        # Reported symptoms
         sym_map = {
             "itch"     : "Itching",
             "grew"     : "Grew recently",
@@ -486,205 +699,120 @@ class ClinicalExpertAgent:
         symptom_lines = []
         for key, label in sym_map.items():
             if str(sym.get(key, "False")).lower() == "true":
-                symptom_lines.append(f"    Yes — {label}")
+                symptom_lines.append(f"  - {label}")
         if not symptom_lines:
-            symptom_lines = ["    No significant symptoms reported"]
+            symptom_lines = ["  No significant symptoms reported"]
 
+        # Medical history
         history_lines = []
         if sym.get("skin_cancer_history"):
-            history_lines.append("    Previous skin cancer history")
+            history_lines.append("  - Previous skin cancer history")
         if sym.get("cancer_history"):
-            history_lines.append("    Previous cancer history")
+            history_lines.append("  - Previous cancer history")
         if sym.get("smoke"):
-            history_lines.append("    Smoker")
+            history_lines.append("  - Smoker")
         if sym.get("drink"):
-            history_lines.append("    Alcohol use")
+            history_lines.append("  - Alcohol use")
         if not history_lines:
-            history_lines = ["    No significant history"]
+            history_lines = ["  No significant history"]
 
-        d1 = sym.get("diameter_1", "Not provided")
-        d2 = sym.get("diameter_2", "Not provided")
-
-        # Top 5
-        top5_str = ""
-        for p in (top_5 or [])[:5]:
-            bar = "=" * int(p.get("confidence", 0) * 20)
-            top5_str += (
-                f"    {p['rank']}. "
-                f"{p['class_name']:<42} "
-                f"{p['confidence_pct']:>6}  {bar}\n"
-            )
-
-        # Risk factors
-        if risk_factors:
-            factors_str = "\n".join(
-                f"    [{i+1}] {f}"
-                for i, f in enumerate(risk_factors))
+        # Risk display
+        urgency_label = URGENCY_LABELS.get(urgency, urgency)
+        if is_pox:
+            risk_display = "INFECTIOUS DISEASE — Isolation required"
+        elif is_mal:
+            risk_display = "MALIGNANT — Urgent specialist referral required"
+        elif risk_level in ("HIGH", "CRITICAL"):
+            risk_display = f"{risk_level} — Specialist referral required"
+        elif risk_level == "MODERATE":
+            risk_display = "MODERATE — Clinical review recommended"
         else:
-            factors_str = (
-                "    No significant risk factors identified")
-
-        ml_str = (
-            f"{ml_probability*100:.1f}%"
-            if ml_probability and ml_probability >= 0
-            else "Not available"
-        )
-
-        # Fusion weights
-        fw_str = ""
-        if fusion_weights:
-            for name, w in fusion_weights.items():
-                bar = "=" * int(w * 30)
-                fw_str += (
-                    f"    {name:<12}: {w:.4f}  {bar}\n")
+            risk_display = "LOW — Routine monitoring recommended"
 
         cs  = clinical_sections
-        sep = "=" * 65
+        SEP = "=" * 60
+        sep = "-" * 60
 
         report = f"""
-{sep}
-     MAAI-SkinDx | CLINICAL EXPERT CONSULTATION REPORT
-{sep}
-  Multi-Agent AI System for Automated Dermatological Diagnosis
-  Insight Centre for Data Analytics | University of Galway
-  Supervisor: Dr. Saeed Alsamhi
-{sep}
+{SEP}
+            MAAI-SkinDx — AI Skin Assessment
+    Insight Centre for Data Analytics | University of Galway
+                Supervisor: Dr. Saeed Alsamhi
+{SEP}
+  Date    : {date_str}       Time : {time_str}
+  Case ID : {case_id}
+{SEP}
 
-SECTION 1 — CASE INFORMATION
+PATIENT DETAILS
 {sep}
-  Case ID          : {case_id}
-  Report Date      : {date_str}
-  Report Time      : {time_str}
-  Report Type      : {'LLM-Generated (openai/gpt-oss-120b)' if llm_used else 'Template-Based (Fallback)'}
-  System           : MAAI-SkinDx Expert Agent v1.0
-  Pipeline Status  : Complete
+  Age           : {age}
+  Gender        : {gender}
+  Affected Area : {region}
 
-{sep}
-SECTION 2 — PATIENT INFORMATION
-{sep}
-  Age              : {age}
-  Gender           : {gender}
-  Skin Tone        : {fitz_label}
-  Affected Region  : {region}
-  Lesion Size      : {d1} mm x {d2} mm
-  Symptoms provided: {'Yes' if sym else 'No — image only'}
-
-  REPORTED SYMPTOMS:
+  Symptoms:
 {chr(10).join(symptom_lines)}
 
-  PATIENT HISTORY:
+  Medical History:
 {chr(10).join(history_lines)}
 
+{SEP}
+DIAGNOSIS
 {sep}
-SECTION 3 — AI DIAGNOSTIC SUMMARY
-{sep}
-  Primary Diagnosis    : {CLASS_FULL_NAMES.get(predicted_index, predicted_name)}
-  AI Confidence        : {confidence*100:.1f}%
-  Classification       : {class_type}
-  Coordination Decision: {decision}
-  Clinical Urgency     : {urgency_label}
+  AI Prediction : {CLASS_FULL_NAMES.get(predicted_index, predicted_name)}
+  Confidence    : {confidence*100:.1f}%
+  Risk          : {risk_display}
+  Decision      : {decision}   Urgency : {urgency_label}
 
-  Decision Rationale:
-    {(decision_rationale or 'Not available')[:300]}
+  Other conditions the AI considered:
+{cs.get('differential_diagnoses', '  Not available')}
 
-  TOP 5 AI PREDICTIONS:
-{top5_str}
+{SEP}
+RECOMMENDED TESTS
 {sep}
-SECTION 4 — VISUAL ANALYSIS (Grad-CAM XAI Agent)
-{sep}
-  Focus Pattern: {focus_type or 'Not available'}
+{cs.get('recommended_investigations', '  Not available')}
 
-  XAI Explanation:
-    {(xai_explanation or 'Not available')[:400]}
+{SEP}
+Rx  MEDICATIONS
+{sep}
+{cs.get('medications', '  Not available')}
 
+{SEP}
+TREATMENT ADVICE
 {sep}
-SECTION 5 — CLINICAL RISK ASSESSMENT
-{sep}
-  Rule-Based Score : {risk_score}/100
-  ML Probability   : {ml_str}
-  Risk Level       : {risk_level or 'Not assessed'}
+{cs.get('treatment_recommendations', '  Not available')}
 
-  RISK FACTORS IDENTIFIED:
-{factors_str}
+  What to avoid:
+{cs.get('things_to_avoid', '  Not available')}
 
+{SEP}
+FOLLOW-UP
 {sep}
-SECTION 6 — COORDINATION AGENT ANALYSIS
-{sep}
-  Conflict Type    : {conflict_type}
-  Conflict Severity: {conflict_severity}
+{cs.get('followup_schedule', '  Not available')}
 
-  Analysis:
-    {(conflict_desc or 'No conflict detected.')[:300]}
+  Referral:
+{cs.get('referral_decision', '  Not available')}
 
-  ADAPTIVE FUSION WEIGHTS:
-{fw_str if fw_str else '    Not available'}
-  Fused Malignancy Signal: {fused_malignancy:.4f}
-
+{SEP}
+IMPORTANT NOTICE
 {sep}
-SECTION 7 — CLINICAL KNOWLEDGE SUMMARY (DermNet NZ via RAG)
-{sep}
-  {rag_summary or 'Not available.'}
-
-{sep}
-SECTION 8 — DIFFERENTIAL DIAGNOSES
-{sep}
-{cs.get('differential_diagnoses', 'Not available')}
-
-{sep}
-SECTION 9 — RECOMMENDED INVESTIGATIONS
-{sep}
-{cs.get('recommended_investigations', 'Not available')}
-
-{sep}
-SECTION 10 — TREATMENT RECOMMENDATIONS
-{sep}
-{cs.get('treatment_recommendations', 'Not available')}
-
-{sep}
-SECTION 11 — MEDICATIONS
-{sep}
-{cs.get('medications', 'Not available')}
-
-{sep}
-SECTION 12 — THINGS TO AVOID
-{sep}
-{cs.get('things_to_avoid', 'Not available')}
-
-{sep}
-SECTION 13 — FOLLOW-UP SCHEDULE
-{sep}
-{cs.get('followup_schedule', 'Not available')}
-
-{sep}
-SECTION 14 — REFERRAL DECISION
-{sep}
-{cs.get('referral_decision', 'Not available')}
-
-{sep}
-SECTION 15 — IMPORTANT DISCLAIMER
-{sep}
-  This report was generated by MAAI-SkinDx, an AI-assisted
-  dermatological diagnosis system developed at the Insight
+  This report is generated by MAAI-SkinDx, an AI-assisted
+  dermatological screening system developed at the Insight
   Centre for Data Analytics, University of Galway.
 
-  This report is intended to SUPPORT clinical decision making
-  by a qualified healthcare professional only. It does NOT
-  replace clinical examination, professional medical judgement,
-  or established diagnostic procedures.
-
-  All AI predictions, risk scores, and recommendations must be
-  verified and acted upon by a qualified clinician.
-
-  System performance: 74.18% macro F1 on 7,734 hold-out test
-  images across 9 disease classes.
+  This report is intended to SUPPORT — not replace — a
+  qualified healthcare professional. All findings must be
+  reviewed and confirmed by a doctor before any action is
+  taken. Do not make medical decisions based on this alone.
 
   In an emergency, contact emergency services immediately.
-  Do not wait for AI assessment.
+
+  AI Performance: Skin classifier 74.18% macro F1 (9 classes)
+                  Pox classifier  97.82% macro F1 (5 classes)
 
   Generated by : MAAI-SkinDx Expert Agent v1.0
   Institution  : University of Galway, Ireland
   Supervisor   : Dr. Saeed Alsamhi
-{sep}
+{SEP}
 """
         return report
 
@@ -714,22 +842,20 @@ SECTION 15 — IMPORTANT DISCLAIMER
         fusion_weights     : dict  = None,
         fused_malignancy   : float = 0.0,
     ) -> dict:
-        """
-        Generate complete clinical expert report.
-        Called by Orchestrator after Agent 5 completes.
-        """
+        is_pox = predicted_index >= POX_INDEX_OFFSET
         print(f"\n{'='*60}")
         print(f"  {self.name}")
         print(f"  Case     : {case_id}")
         print(f"  Diagnosis: {predicted_name} "
               f"({confidence*100:.1f}%)")
         print(f"  Decision : {decision} | {urgency}")
+        print(f"  Type     : "
+              f"{'POX CASE' if is_pox else 'Skin disease'}")
         print(f"  LLM      : "
               f"{'Groq active' if self.client else 'fallback'}")
         print(f"{'='*60}")
 
         try:
-            # Step 1 — Generate LLM clinical sections 8-14
             print(f"\n  -- Generating Clinical Sections --")
             clinical_sections = self._generate_clinical_sections(
                 predicted_name  = predicted_name,
@@ -748,9 +874,9 @@ SECTION 15 — IMPORTANT DISCLAIMER
                 urgency         = urgency,
                 symptoms        = symptoms or {},
             )
-            llm_used = self.client is not None
+            llm_used = (
+                self.client is not None and not is_pox)
 
-            # Step 2 — Assemble full 15-section report
             print(f"\n  -- Assembling Report --")
             report = self._assemble_report(
                 case_id            = case_id,
@@ -778,7 +904,6 @@ SECTION 15 — IMPORTANT DISCLAIMER
                 fused_malignancy   = fused_malignancy,
             )
 
-            # Step 3 — Save to disk
             os.makedirs(OUTPUT_DIR, exist_ok=True)
             report_path = os.path.join(
                 OUTPUT_DIR,

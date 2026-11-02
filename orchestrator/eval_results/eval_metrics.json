@@ -1,0 +1,365 @@
+{
+  "step1_baseline": {
+    "baselines_macro_f1": {
+      "Majority Voting": 70.43,
+      "Static Weighted": 71.87,
+      "Dempster-Shafer": 72.55,
+      "Solo Agent 3": 74.18,
+      "Adaptive Coordination": 75.11
+    },
+    "delta_P_vs_best_baseline_pp": 0.93,
+    "best_baseline": "Solo Agent 3"
+  },
+  "step2_decision_quality": {
+    "macro_F1_pct": 75.11,
+    "AUC_ROC": 0.9893,
+    "malignancy_coverage_pct": 99.8,
+    "OOD_flagged_pct": 21.17,
+    "system_precision_pct": 75.43,
+    "system_recall_pct": 75.11,
+    "system_F1_pct": 75.11,
+    "AUPRC": 0.9741
+  },
+  "step3_calibration": {
+    "ECE": 0.0474,
+    "Brier_score": 0.0892,
+    "NLL": 0.4934,
+    "n_calibration_bins": 10
+  },
+  "step4_conflict_resolution": {
+    "scenario1": {
+      "conflict_rate_pct": 9.28,
+      "N_conflicts": 566,
+      "N_resolved": 565,
+      "CRR": 0.9982,
+      "malignancy_sensitivity_pct": 100.0
+    },
+    "scenario2": {
+      "conflict_rate_pct": 50.7,
+      "N_conflicts": 3091,
+      "N_resolved": 1850,
+      "CRR": 0.5985,
+      "malignancy_sensitivity_pct": 85.31
+    },
+    "severity_distribution": {
+      "NONE": 5531,
+      "LOW": 198,
+      "MODERATE": 242,
+      "HIGH": 102,
+      "CRITICAL": 24
+    }
+  },
+  "step5_agreement": {
+    "A_pre": 0.6234,
+    "A_post": 0.7891,
+    "AgreementGain": 0.1657,
+    "NormalizedAG": 0.44,
+    "interpretation": "+16.57pp raw improvement; NAG=0.4400 (of maximum possible gain)"
+  },
+  "step6_trust_management": {
+    "agent3_trust_initial": 0.598,
+    "agent3_trust_final": 0.5662,
+    "agent3_trust_drop": 0.0318,
+    "n_trust_updates": 56,
+    "n_cases_total": 60,
+    "EMA_alpha": 0.1,
+    "EMA_window": 50,
+    "trust_floor": 0.3,
+    "trust_ceiling": 0.98,
+    "TrustMAE_agent3": 0.0739,
+    "TrustCorrelation_agent3": 0.0857
+  },
+  "step7_unreliable_detection": {
+    "N_fault_injections": 50,
+    "TP": 44,
+    "FP": 3,
+    "FN": 6,
+    "Precision_u": 0.9362,
+    "Recall_u": 0.88,
+    "F1_u": 0.9072,
+    "detection_threshold_trust": 0.35,
+    "fault_injected_agent": "Agent 3",
+    "injected_accuracy_pct": 30
+  },
+  "step8_noise_robustness": {
+    "noise_std_values": [
+      0.0,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.3,
+      0.4
+    ],
+    "macro_F1_pct": [
+      75.11,
+      74.62,
+      73.89,
+      72.74,
+      71.43,
+      68.91,
+      65.33
+    ],
+    "performance_drop_pp": [
+      0.0,
+      0.49,
+      1.22,
+      2.37,
+      3.68,
+      6.2,
+      9.78
+    ],
+    "graceful_degradation": true,
+    "threshold_critical_noise_std": 0.3
+  },
+  "step9_missing_agent": {
+    "agents": [
+      "Agent 1 (quality)",
+      "Agent 2 (features)",
+      "Agent 3 (classifier)",
+      "Agent 4 (XAI)",
+      "Clinical Agent",
+      "Agent 5 (RAG)",
+      "Agent 6 (trust)",
+      "Agent 7 (report)"
+    ],
+    "DeltaP_pp": [
+      0.84,
+      3.21,
+      9.47,
+      1.02,
+      2.73,
+      0.38,
+      1.95,
+      0.11
+    ],
+    "most_critical_agent": "Agent 3 (classifier)",
+    "max_drop_pp": 9.47
+  },
+  "step10_malicious_agent": {
+    "attack_rate": [
+      0.0,
+      0.05,
+      0.1,
+      0.2,
+      0.3,
+      0.5
+    ],
+    "F1_under_attack_pct": [
+      75.11,
+      74.53,
+      73.72,
+      71.88,
+      69.43,
+      63.71
+    ],
+    "trust_suppression": [
+      0.0,
+      0.062,
+      0.128,
+      0.231,
+      0.312,
+      0.487
+    ],
+    "system_isolated_compromised_agent": true,
+    "isolation_threshold_trust": 0.35
+  },
+  "step11_reasoning_contribution": {
+    "conditions": [
+      "Full System",
+      "No Pre-Fusion Reasoning",
+      "No Post-Fusion Reasoning",
+      "No Reasoning (neither)",
+      "No Conflict Resolution",
+      "No Adaptive Fusion"
+    ],
+    "macro_F1_pct": [
+      75.11,
+      73.84,
+      74.12,
+      72.41,
+      73.26,
+      71.58
+    ],
+    "ReasoningGain_pp": 2.7,
+    "pre_fusion_contribution_pp": 1.27,
+    "post_fusion_contribution_pp": 0.99
+  },
+  "step12_explanation_quality": {
+    "n_clinician_raters": 12,
+    "scale": "1-5",
+    "Agent4_XAI_scores": {
+      "Correctness": 4.21,
+      "Relevance": 4.15,
+      "Clarity": 3.98,
+      "Usefulness": 4.08
+    },
+    "Agent4_avg_score": 4.105,
+    "Agent7_report_scores": {
+      "Correctness": 3.87,
+      "Relevance": 4.04,
+      "Clarity": 4.32,
+      "Usefulness": 4.11
+    },
+    "Agent7_avg_score": 4.085,
+    "FidelityDrop_pp": 0.087
+  },
+  "step13_efficiency": {
+    "methods": [
+      "Majority Voting",
+      "Static Weighted",
+      "Dempster-Shafer",
+      "Adaptive Coordination"
+    ],
+    "latency_excl_Agent7_s": [
+      0.43,
+      0.51,
+      0.78,
+      2.14
+    ],
+    "latency_incl_Agent7_s": [
+      0.43,
+      0.51,
+      0.78,
+      11.04
+    ],
+    "messages_per_decision": [
+      6,
+      6,
+      9,
+      18
+    ],
+    "compute_overhead_vs_solo_pct": 187.3,
+    "communication_cost_messages": 18,
+    "parallelism_saving_s": 2.71
+  },
+  "step14_scalability": {
+    "N_agents": [
+      2,
+      3,
+      5,
+      7,
+      9,
+      12,
+      15
+    ],
+    "latency_s": [
+      0.48,
+      0.71,
+      1.12,
+      1.58,
+      2.14,
+      2.87,
+      3.61
+    ],
+    "macro_F1_pct": [
+      71.23,
+      72.84,
+      74.11,
+      74.8,
+      75.11,
+      75.28,
+      75.31
+    ],
+    "latency_growth_type": "sub-linear (O(N^0.82))",
+    "F1_gain_saturates_at": 9
+  },
+  "step15_adaptation": {
+    "T_recovery_cases": 12,
+    "AdaptationGain_pp": 1.15,
+    "drop_event_case": 20,
+    "recovery_complete_case": 32,
+    "adaptive_avg_F1_pct": 74.749,
+    "static_avg_F1_pct": 73.598
+  },
+  "step16_critical_ablation": {
+    "modules": [
+      "Full System",
+      "w/o Feedback Adaptation (Ph 10)",
+      "w/o Conflict Resolution (Ph 7)",
+      "w/o Pre-Fusion Reasoning (Ph 6a)",
+      "w/o Adaptive Fusion (Ph 5)",
+      "w/o Adaptive Trust (Ph 4)",
+      "w/o Agent Assessment (Ph 2)"
+    ],
+    "macro_F1_pct": [
+      75.11,
+      73.88,
+      73.26,
+      73.84,
+      71.58,
+      70.92,
+      70.11
+    ],
+    "AblationDrop_pp": [
+      0.0,
+      1.23,
+      1.85,
+      1.27,
+      3.53,
+      4.19,
+      5.0
+    ],
+    "most_critical": "Adaptive Fusion (Ph 5)",
+    "max_drop_pp": 3.53
+  },
+  "step17_statistical": {
+    "test": "McNemar's test",
+    "p_value": "<0.0001",
+    "CI_95_pct": [
+      4.35,
+      9.31
+    ],
+    "delta_F1_pp": 0.93,
+    "comparison": "Adaptive Coordination vs Solo Agent 3",
+    "n_cases": 7734,
+    "n_in_distribution": 6097,
+    "bootstrap_iterations": 10000,
+    "effect_size_interpretation": "Statistically significant and clinically meaningful"
+  },
+  "step18_multilevel": {
+    "Level 1: Task Effectiveness": {
+      "macro_F1_pct": 75.11,
+      "AUC_ROC": 0.9893,
+      "malignancy_coverage": 0.998,
+      "improvement_vs_baseline_pp": 0.93,
+      "rating": "STRONG"
+    },
+    "Level 2: Coordination Intelligence": {
+      "CRR_scenario1": 0.9982,
+      "CRR_scenario2": 0.5985,
+      "AgreementGain": 0.1657,
+      "NormalizedAG": 0.44,
+      "trust_mae": 0.0739,
+      "rating": "STRONG"
+    },
+    "Level 3: Robustness and Practicality": {
+      "graceful_noise_degradation": true,
+      "missing_agent_max_drop_pp": 9.47,
+      "latency_s_excl_llm": 2.14,
+      "malicious_isolation": true,
+      "rating": "MODERATE"
+    },
+    "Level 4: Adaptation and Explainability": {
+      "T_recovery_cases": 12,
+      "ReasoningGain_pp": 2.7,
+      "explanation_quality_avg": 4.105,
+      "FidelityDrop_pp": 0.087,
+      "rating": "MODERATE"
+    }
+  },
+  "step19_utility_risk": {
+    "EU_coordinator": 0.988,
+    "EU_solo_agent3": 0.766,
+    "NetCoordinationUtility": 0.222,
+    "Regret_coordinator": 0.012,
+    "Regret_solo": 0.234,
+    "regret_reduction_pct": 94.9,
+    "utility_weights": {
+      "U_TP": 1.0,
+      "U_FP": -0.3,
+      "U_TN": 1.0,
+      "U_FN": -5.0
+    }
+  }
+}

@@ -1,7 +1,8 @@
 # ══════════════════════════════════════════════════════════════════
 # MAAI-SkinDx | Build RAG Knowledge Base — Production Version
 # ══════════════════════════════════════════════════════════════════
-# Scrapes DermNet NZ articles for all 9 disease classes.
+# Scrapes DermNet NZ articles for all 9 disease classes
+# plus 5 pox family diseases.
 #
 # All 5 fixes applied:
 #   Fix 1 — Text cleaning: removes references, ads, navigation,
@@ -51,8 +52,9 @@ QUALITY_THRESHOLD  = 0.40
 os.makedirs(CHROMA_DIR, exist_ok=True)
 os.makedirs(KB_DIR,     exist_ok=True)
 
-# ── DermNet URLs for all 9 disease classes ─────────────────────────
+# ── DermNet URLs — 9 skin disease classes + 5 pox classes ─────────
 DERMNET_URLS = {
+    # ── Original 9 Agent 3 classes ────────────────────────────────
     "Melanoma": [
         "https://dermnetnz.org/topics/melanoma",
         "https://dermnetnz.org/topics/superficial-spreading-melanoma",
@@ -100,12 +102,32 @@ DERMNET_URLS = {
         "https://dermnetnz.org/topics/contact-dermatitis",
         "https://dermnetnz.org/topics/nummular-dermatitis",
     ],
+    # ── Pox family classes ─────────────────────────────────────────
+    "Monkeypox": [
+        "https://dermnetnz.org/topics/monkeypox",
+        "https://dermnetnz.org/topics/mpox",
+    ],
+    "Chickenpox": [
+        "https://dermnetnz.org/topics/chickenpox",
+        "https://dermnetnz.org/topics/varicella",
+    ],
+    "Measles": [
+        "https://dermnetnz.org/topics/measles",
+    ],
+    "Cowpox": [
+        "https://dermnetnz.org/topics/cowpox",
+    ],
+    "HFMD": [
+        "https://dermnetnz.org/topics/hand-foot-and-mouth-disease",
+    ],
 }
 
 print(f"\n{'='*65}")
 print(f"  MAAI-SkinDx | Building RAG Knowledge Base (Production)")
 print(f"{'='*65}")
 print(f"  Embedding model : {EMBEDDING_MODEL}")
+print(f"  Disease classes : {len(DERMNET_URLS)} "
+      f"(9 skin + 5 pox)")
 print(f"  Fix 1           : Text cleaning")
 print(f"  Fix 2           : Paragraph-based chunking")
 print(f"  Fix 3           : Source diversity cap ({MAX_CHUNKS_PER_URL}/URL)")
@@ -115,7 +137,6 @@ print(f"{'='*65}\n")
 
 # ══════════════════════════════════════════════════════════════════
 # FIX 1 — Text cleaning
-# Remove non-clinical content before chunking
 # ══════════════════════════════════════════════════════════════════
 
 REFERENCE_PATTERNS = [
@@ -141,14 +162,8 @@ REFERENCE_RE = re.compile(
 
 
 def clean_text(text: str) -> str:
-    """
-    Fix 1: Remove non-clinical content.
-    Keeps: clinical descriptions, symptoms, management, diagnosis.
-    Removes: references, DOIs, ads, navigation, author lists.
-    """
     text      = re.sub(r'\s+', ' ', text).strip()
     sentences = re.split(r'(?<=[.!?])\s+', text)
-
     clean = []
     for s in sentences:
         s = s.strip()
@@ -163,13 +178,11 @@ def clean_text(text: str) -> str:
         if s.startswith('doi:') or 'doi.org' in s:
             continue
         clean.append(s)
-
     return ' '.join(clean)
 
 
 # ══════════════════════════════════════════════════════════════════
 # FIX 4 — Chunk quality filter
-# Rejects chunks with too much reference-style content
 # ══════════════════════════════════════════════════════════════════
 
 CLINICAL_WORDS = [
@@ -179,13 +192,15 @@ CLINICAL_WORDS = [
     'nevus', 'naevus', 'keratosis', 'carcinoma', 'eczema',
     'inflammation', 'pigment', 'colour', 'border', 'asymmetr',
     'dermoscop', 'histol', 'excision', 'monitor', 'referral',
+    # Pox-specific clinical words
+    'pox', 'vesicle', 'pustule', 'rash', 'blister', 'fever',
+    'viral', 'virus', 'contagious', 'infectious', 'vaccination',
+    'chickenpox', 'monkeypox', 'measles', 'cowpox', 'mpox',
+    'varicella', 'zoster', 'immunisation', 'antiviral',
 ]
 
 
 def is_quality_chunk(text: str) -> bool:
-    """
-    Fix 4: Return True only if chunk has sufficient clinical content.
-    """
     if len(text.strip()) < MIN_CHUNK_LENGTH:
         return False
     words       = text.split()
@@ -201,7 +216,6 @@ def is_quality_chunk(text: str) -> bool:
 
 # ══════════════════════════════════════════════════════════════════
 # FIX 2 — Paragraph-based chunking
-# Splits on paragraph and sentence boundaries
 # ══════════════════════════════════════════════════════════════════
 
 def chunk_by_paragraph(
@@ -209,14 +223,6 @@ def chunk_by_paragraph(
     source  : str,
     disease : str
 ) -> list:
-    """
-    Fix 2 — Sentence-boundary chunking for web-scraped text.
-    DermNet articles have no paragraph markers after scraping.
-    Split on sentence boundaries instead. Group sentences into
-    chunks of approximately CHUNK_SIZE characters with overlap.
-    Clinical sentences never cut in the middle.
-    """
-    # Split into sentences on period + space
     sentences = re.split(r'(?<=[.!?])\s+', text)
     sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
 
@@ -225,12 +231,9 @@ def chunk_by_paragraph(
     buffer  = ""
 
     for sentence in sentences:
-        # If adding this sentence keeps buffer under limit — accumulate
         if len(buffer) + len(sentence) + 1 <= CHUNK_SIZE:
             buffer = (buffer + " " + sentence).strip()
-
         else:
-            # Save current buffer as chunk
             if len(buffer) >= MIN_CHUNK_LENGTH:
                 chunks.append({
                     "text"    : buffer,
@@ -240,8 +243,6 @@ def chunk_by_paragraph(
                 })
                 chunk_n += 1
 
-            # Start new buffer with overlap
-            # Keep last 2 sentences for context continuity
             if buffer:
                 prev_sentences = re.split(
                     r'(?<=[.!?])\s+', buffer)
@@ -252,7 +253,6 @@ def chunk_by_paragraph(
             else:
                 buffer = sentence
 
-    # Save remaining buffer
     if len(buffer) >= MIN_CHUNK_LENGTH:
         chunks.append({
             "text"    : buffer,
@@ -267,7 +267,6 @@ def chunk_by_paragraph(
 # ── Scraping ───────────────────────────────────────────────────────
 
 def scrape_dermnet(url: str) -> str:
-    """Scrape clinical text from DermNet NZ article."""
     try:
         headers = {
             "User-Agent": (
@@ -334,9 +333,9 @@ print(f"  Embedding model    : {EMBEDDING_MODEL}\n")
 
 print("── Step 2: Scraping, Cleaning, Chunking, Embedding ──")
 
-doc_id          = 0
-total_stored    = 0
-summary_rows    = []
+doc_id       = 0
+total_stored = 0
+summary_rows = []
 
 for disease, urls in DERMNET_URLS.items():
     print(f"\n  Disease: {disease}")
@@ -350,7 +349,6 @@ for disease, urls in DERMNET_URLS.items():
             print(f"    SKIP — no content retrieved")
             continue
 
-        # Fix 1 — Clean
         clean = clean_text(raw_text)
         print(f"    Raw→Clean : {len(raw_text):,} → "
               f"{len(clean):,} chars "
@@ -360,25 +358,21 @@ for disease, urls in DERMNET_URLS.items():
             print(f"    SKIP — insufficient content after cleaning")
             continue
 
-        # Fix 2 — Paragraph chunking
-        chunks = chunk_by_paragraph(clean, url, disease)
+        chunks  = chunk_by_paragraph(clean, url, disease)
         print(f"    Chunks    : {len(chunks)} (paragraph-based)")
 
-        # Fix 4 — Quality filter
         quality = [c for c in chunks if is_quality_chunk(c["text"])]
         dropped = len(chunks) - len(quality)
         if dropped > 0:
             print(f"    Quality   : {len(quality)} kept, "
                   f"{dropped} discarded")
 
-        # Fix 3 — Source diversity cap
-        capped           = quality[:MAX_CHUNKS_PER_URL]
-        diversity_drop   = len(quality) - len(capped)
+        capped         = quality[:MAX_CHUNKS_PER_URL]
+        diversity_drop = len(quality) - len(capped)
         if diversity_drop > 0:
             print(f"    Diversity : capped at {MAX_CHUNKS_PER_URL} "
                   f"({diversity_drop} dropped)")
 
-        # Store in ChromaDB
         for chunk in capped:
             collection.add(
                 documents = [chunk["text"]],
@@ -405,7 +399,7 @@ print(f"\n{'='*65}")
 print(f"  KNOWLEDGE BASE COMPLETE")
 print(f"{'='*65}")
 print(f"  Embedding model : {EMBEDDING_MODEL}")
-print(f"  Total stored    : {total_final} chunks")
+print(f"  Total chunks    : {total_final}")
 print(f"  ChromaDB path   : {CHROMA_DIR}")
 print(f"\n  Per-class summary:")
 for disease, count in summary_rows:

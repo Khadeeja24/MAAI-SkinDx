@@ -1,0 +1,159 @@
+{
+  "date": "2026-10-01T10:48:10.218593",
+  "n_bootstrap": 10000,
+  "alpha": 0.05,
+  "n_total": 7734,
+  "n_in_distribution": 6097,
+  "ood_threshold": 0.4,
+  "system_1": {
+    "label": "Agent 3 alone",
+    "n_cases": 7734,
+    "macro_f1_obs": 68.277,
+    "macro_f1_ci_95": [
+      66.3439,
+      69.9478
+    ],
+    "bootstrap_mean": 68.2126,
+    "bootstrap_std": 0.9252
+  },
+  "system_2": {
+    "label": "Agent 3 + OOD Detection",
+    "n_cases": 6097,
+    "macro_f1_obs": 75.1138,
+    "macro_f1_ci_95": [
+      73.1684,
+      76.6868
+    ],
+    "bootstrap_mean": 75.0586,
+    "bootstrap_std": 0.8948
+  },
+  "improvement": {
+    "delta_observed": 6.8368,
+    "delta_ci_95": [
+      4.3508,
+      9.3112
+    ],
+    "p_value": 0.0,
+    "significant": true,
+    "conclusion": "The 6.84% improvement is statistically significant (p=0.0000 < alpha=0.05). 95% CI on improvement: [+4.35%, +9.31%]."
+  },
+  "per_class_results": {
+    "Melanoma": {
+      "obs_s1": 68.1,
+      "obs_s2": 72.61,
+      "delta": 4.51,
+      "s1_95ci": [
+        65.98,
+        70.18
+      ],
+      "s2_95ci": [
+        70.36,
+        74.8
+      ]
+    },
+    "Melanocytic Nevus": {
+      "obs_s1": 34.16,
+      "obs_s2": 32.08,
+      "delta": -2.08,
+      "s1_95ci": [
+        29.56,
+        38.6
+      ],
+      "s2_95ci": [
+        26.73,
+        37.43
+      ]
+    },
+    "Basal Cell Carcinoma": {
+      "obs_s1": 72.68,
+      "obs_s2": 81.83,
+      "delta": 9.16,
+      "s1_95ci": [
+        68.88,
+        76.2
+      ],
+      "s2_95ci": [
+        78.12,
+        85.23
+      ]
+    },
+    "Actinic Keratosis / SCC": {
+      "obs_s1": 71.05,
+      "obs_s2": 79.09,
+      "delta": 8.04,
+      "s1_95ci": [
+        67.2,
+        74.69
+      ],
+      "s2_95ci": [
+        75.1,
+        82.71
+      ]
+    },
+    "Benign Keratosis": {
+      "obs_s1": 60.11,
+      "obs_s2": 66.35,
+      "delta": 6.24,
+      "s1_95ci": [
+        58.2,
+        62.04
+      ],
+      "s2_95ci": [
+        64.23,
+        68.32
+      ]
+    },
+    "Vascular Lesion": {
+      "obs_s1": 85.16,
+      "obs_s2": 91.33,
+      "delta": 6.17,
+      "s1_95ci": [
+        83.61,
+        86.65
+      ],
+      "s2_95ci": [
+        90.03,
+        92.58
+      ]
+    },
+    "Dermatofibroma": {
+      "obs_s1": 69.7,
+      "obs_s2": 88.89,
+      "delta": 19.19,
+      "s1_95ci": [
+        55.32,
+        81.16
+      ],
+      "s2_95ci": [
+        75.56,
+        97.67
+      ]
+    },
+    "Inflammatory": {
+      "obs_s1": 72.0,
+      "obs_s2": 77.48,
+      "delta": 5.48,
+      "s1_95ci": [
+        69.98,
+        73.92
+      ],
+      "s2_95ci": [
+        75.35,
+        79.54
+      ]
+    },
+    "Eczema / Dermatitis": {
+      "obs_s1": 81.54,
+      "obs_s2": 86.36,
+      "delta": 4.82,
+      "s1_95ci": [
+        79.8,
+        83.19
+      ],
+      "s2_95ci": [
+        84.73,
+        87.86
+      ]
+    }
+  }
+}

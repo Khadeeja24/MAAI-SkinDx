@@ -1,0 +1,182 @@
+{
+  "date": "2026-10-01T11:30:56.054525",
+  "n_cases_simulated": 60,
+  "n_malignant": 30,
+  "n_benign": 30,
+  "n_outcomes_submitted": 60,
+  "prediction_accuracy": 25.0,
+  "initial_trust_scores": {},
+  "final_trust_scores": {
+    "agent3": 0.5662,
+    "clinical": 0.927
+  },
+  "base_trust_scores": {
+    "agent3": 0.742,
+    "clinical": 0.927
+  },
+  "n_trust_updates": 56,
+  "trust_evolution": [
+    {
+      "after_outcome": 5,
+      "updated_scores": {
+        "agent3": 0.5382,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 6,
+      "updated_scores": {
+        "agent3": 0.5382,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 7,
+      "updated_scores": {
+        "agent3": 0.5382,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 8,
+      "updated_scores": {
+        "agent3": 0.5382,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 9,
+      "updated_scores": {
+        "agent3": 0.5493,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 10,
+      "updated_scores": {
+        "agent3": 0.5482,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 11,
+      "updated_scores": {
+        "agent3": 0.5564,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 12,
+      "updated_scores": {
+        "agent3": 0.5632,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 13,
+      "updated_scores": {
+        "agent3": 0.569,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 14,
+      "updated_scores": {
+        "agent3": 0.5668,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 15,
+      "updated_scores": {
+        "agent3": 0.5715,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 16,
+      "updated_scores": {
+        "agent3": 0.5695,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 17,
+      "updated_scores": {
+        "agent3": 0.5735,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 18,
+      "updated_scores": {
+        "agent3": 0.5771,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 19,
+      "updated_scores": {
+        "agent3": 0.5803,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 20,
+      "updated_scores": {
+        "agent3": 0.5832,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 21,
+      "updated_scores": {
+        "agent3": 0.5858,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 22,
+      "updated_scores": {
+        "agent3": 0.5837,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 23,
+      "updated_scores": {
+        "agent3": 0.5817,
+        "clinical": 0.927
+      }
+    },
+    {
+      "after_outcome": 24,
+      "updated_scores": {
+        "agent3": 0.584,
+        "clinical": 0.927
+      }
+    }
+  ],
+  "agent6_summary": {
+    "total_cases": 74,
+    "confirmed_outcomes": 60,
+    "current_trust": {
+      "agent3": 0.5662,
+      "clinical": 0.927
+    },
+    "decision_counts": {
+      "": 12,
+      "ESCALATE": 7,
+      "OOD_WARNING": 23,
+      "ROUTINE": 32
+    }
+  },
+  "ema_config": {
+    "alpha": 0.1,
+    "window_size": 50,
+    "min_cases": 5,
+    "trust_floor": 0.3,
+    "trust_ceiling": 0.98
+  },
+  "conclusion": "Agent 6 background learning demonstrated end-to-end. 60 cases stored, 60 confirmed outcomes submitted. Trust scores updated via EMA from real simulated outcomes. System prediction accuracy on simulation: 25.0%."
+}

@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-30T14:35:35.561861",
+  "n_total": 7734,
+  "n_in_distribution": 6097,
+  "ood_threshold": 0.4,
+  "scenario_1_informed_clinical": {
+    "description": "Clinical agent correctly reflects true label",
+    "n_cases": 6097,
+    "conflict_rate_pct": 9.28,
+    "image_low_symptom_high": 550,
+    "image_high_symptom_low": 16,
+    "concordant": 5531,
+    "resolution_accuracy_pct": 99.74,
+    "sensitivity_pct": 100.0,
+    "specificity_pct": 99.63,
+    "correctly_escalated": 1790,
+    "malignant_total": 1790
+  },
+  "scenario_2_noisy_clinical": {
+    "description": "Clinical agent 50% accurate (noise stress test)",
+    "n_cases": 6097,
+    "conflict_rate_pct": 50.7,
+    "resolution_accuracy_pct": 59.85,
+    "sensitivity_pct": 85.31
+  }
+}

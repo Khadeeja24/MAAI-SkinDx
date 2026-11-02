@@ -1,0 +1,96 @@
+{
+  "date": "2026-10-01T11:43:37.616427",
+  "n_total": 7734,
+  "n_in_dist": 6097,
+  "n_bins": 10,
+  "ood_threshold": 0.4,
+  "system_1": {
+    "label": "Agent 3 alone",
+    "ece": 0.1975,
+    "mce": 0.4711,
+    "mean_confidence": 0.508,
+    "mean_accuracy": 0.7055,
+    "overconfidence": -0.1975,
+    "bin_accuracies": [
+      0.0,
+      0.6667,
+      0.376,
+      0.5051,
+      0.6521,
+      0.7692,
+      0.8781,
+      0.9784,
+      0.9902,
+      1.0
+    ],
+    "bin_confidences": [
+      0.05,
+      0.1955,
+      0.27,
+      0.3607,
+      0.4514,
+      0.5464,
+      0.6432,
+      0.7425,
+      0.8423,
+      0.9289
+    ],
+    "bin_counts": [
+      0,
+      3,
+      250,
+      1384,
+      2478,
+      1906,
+      1001,
+      462,
+      204,
+      46
+    ]
+  },
+  "system_2": {
+    "label": "Agent 3 + OOD Detection",
+    "ece": 0.2131,
+    "mce": 0.2358,
+    "mean_confidence": 0.5513,
+    "mean_accuracy": 0.7645,
+    "overconfidence": -0.2131,
+    "bin_accuracies": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.6521,
+      0.7692,
+      0.8781,
+      0.9784,
+      0.9902,
+      1.0
+    ],
+    "bin_confidences": [
+      0.05,
+      0.15,
+      0.25,
+      0.35,
+      0.4514,
+      0.5464,
+      0.6432,
+      0.7425,
+      0.8423,
+      0.9289
+    ],
+    "bin_counts": [
+      0,
+      0,
+      0,
+      0,
+      2478,
+      1906,
+      1001,
+      462,
+      204,
+      46
+    ]
+  },
+  "interpretation": "System 1 ECE=19.75%. System 2 (OOD filtered) ECE=21.31%. OOD filtering changes calibration by 1.57%. The model is underconfident on average."
+}

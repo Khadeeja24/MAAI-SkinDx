@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-01T11:24:56.672556",
+  "n_total": 7734,
+  "n_in_dist": 6097,
+  "n_malignant_all": 2398,
+  "n_malignant_ind": 1790,
+  "ood_threshold": 0.4,
+  "malignant_classes": [
+    0,
+    2,
+    3
+  ],
+  "system_1": {
+    "label": "Agent 3 alone (all images)",
+    "n_cases": 7734,
+    "auc_roc": 0.9796,
+    "average_precision": 0.9472,
+    "optimal_threshold": 0.2185,
+    "sensitivity": 0.9704,
+    "specificity": 0.9055,
+    "sens_at_95_spec": 0.8778,
+    "tp": 2327,
+    "fp": 504,
+    "tn": 4832,
+    "fn": 71
+  },
+  "system_2": {
+    "label": "Agent 3 + OOD Detection",
+    "n_cases": 6097,
+    "auc_roc": 0.9893,
+    "average_precision": 0.9707,
+    "optimal_threshold": 0.2202,
+    "sensitivity": 0.9765,
+    "specificity": 0.9343,
+    "sens_at_95_spec": 0.9514,
+    "tp": 1748,
+    "fp": 283,
+    "tn": 4024,
+    "fn": 42
+  },
+  "per_class_auc": {
+    "Melanoma": 0.991,
+    "Melanocytic Nevus": 0.9799,
+    "Basal Cell Carcinoma": 0.9904,
+    "Actinic Keratosis / Squamous Cell Carcinoma": 0.9853,
+    "Benign Keratosis": 0.9318,
+    "Vascular Lesion": 0.9894,
+    "Dermatofibroma": 0.9999,
+    "Inflammatory": 0.956,
+    "Eczema / Dermatitis": 0.9826
+  },
+  "plots": {
+    "roc_curve": "C:\\Users\\khadeeja\\Desktop\\Projects\\Skin\\evaluation\\roc_curve.png",
+    "per_class_auc": "C:\\Users\\khadeeja\\Desktop\\Projects\\Skin\\evaluation\\per_class_auc.png"
+  }
+}

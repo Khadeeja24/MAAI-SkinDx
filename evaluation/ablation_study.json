@@ -1,0 +1,152 @@
+{
+  "date": "2026-09-30T14:57:42.147223",
+  "n_total": 7734,
+  "ood_threshold": 0.4,
+  "ablation_results": {
+    "A0": {
+      "label": "A0: Agent 3 alone",
+      "coordination": "None",
+      "n_evaluated": 7734,
+      "n_excluded": 0,
+      "macro_f1": 68.28,
+      "accuracy": 70.55,
+      "malignant_coverage_pct": 64.3,
+      "per_class_f1": {
+        "Melanoma": 68.1,
+        "Melanocytic Nevus": 34.16,
+        "Basal Cell Carcinoma": 72.68,
+        "Actinic Keratosis / SCC": 71.05,
+        "Benign Keratosis": 60.11,
+        "Vascular Lesion": 85.16,
+        "Dermatofibroma": 69.7,
+        "Inflammatory": 72.0,
+        "Eczema / Dermatitis": 81.54
+      }
+    },
+    "A1": {
+      "label": "A1: + OOD Detection",
+      "coordination": "OOD filtering",
+      "n_evaluated": 6097,
+      "n_excluded": 1637,
+      "macro_f1": 75.11,
+      "accuracy": 76.45,
+      "malignant_coverage_pct": 69.27,
+      "per_class_f1": {
+        "Melanoma": 72.61,
+        "Melanocytic Nevus": 32.08,
+        "Basal Cell Carcinoma": 81.83,
+        "Actinic Keratosis / SCC": 79.09,
+        "Benign Keratosis": 66.35,
+        "Vascular Lesion": 91.33,
+        "Dermatofibroma": 88.89,
+        "Inflammatory": 77.48,
+        "Eczema / Dermatitis": 86.36
+      },
+      "ood_flagged": 1637,
+      "ood_flagged_pct": 21.17
+    },
+    "A2": {
+      "label": "A2: + Adaptive Trust Weights",
+      "coordination": "OOD + Adaptive Trust",
+      "n_evaluated": 6097,
+      "n_excluded": 1637,
+      "macro_f1": 75.11,
+      "accuracy": 76.45,
+      "malignant_coverage_pct": 69.27,
+      "per_class_f1": {
+        "Melanoma": 72.61,
+        "Melanocytic Nevus": 32.08,
+        "Basal Cell Carcinoma": 81.83,
+        "Actinic Keratosis / SCC": 79.09,
+        "Benign Keratosis": 66.35,
+        "Vascular Lesion": 91.33,
+        "Dermatofibroma": 88.89,
+        "Inflammatory": 77.48,
+        "Eczema / Dermatitis": 86.36
+      },
+      "trust_threshold": 0.25
+    },
+    "A3": {
+      "label": "A3: + Conflict Resolution (no clinical)",
+      "coordination": "OOD + Conflict Resolution",
+      "n_evaluated": 6097,
+      "n_excluded": 1637,
+      "macro_f1": 75.11,
+      "accuracy": 76.45,
+      "malignant_coverage_pct": 69.27,
+      "per_class_f1": {
+        "Melanoma": 72.61,
+        "Melanocytic Nevus": 32.08,
+        "Basal Cell Carcinoma": 81.83,
+        "Actinic Keratosis / SCC": 79.09,
+        "Benign Keratosis": 66.35,
+        "Vascular Lesion": 91.33,
+        "Dermatofibroma": 88.89,
+        "Inflammatory": 77.48,
+        "Eczema / Dermatitis": 86.36
+      },
+      "note": "Without clinical symptom data, conflict resolution defaults to NO_CLINICAL_DATA \u2014 same result as OOD-only. Conflict resolution adds value when symptoms are submitted."
+    },
+    "A4": {
+      "label": "A4: Full System",
+      "coordination": "OOD + Adaptive Trust + Conflict Resolution + Adaptive Fusion",
+      "n_evaluated": 6097,
+      "n_excluded": 1637,
+      "macro_f1": 75.11,
+      "accuracy": 76.45,
+      "malignant_coverage_pct": 69.27,
+      "per_class_f1": {
+        "Melanoma": 72.61,
+        "Melanocytic Nevus": 32.08,
+        "Basal Cell Carcinoma": 81.83,
+        "Actinic Keratosis / SCC": 79.09,
+        "Benign Keratosis": 66.35,
+        "Vascular Lesion": 91.33,
+        "Dermatofibroma": 88.89,
+        "Inflammatory": 77.48,
+        "Eczema / Dermatitis": 86.36
+      },
+      "note": "Full coordination system. Classification F1 matches A1 because coordination improves decision confidence and safety, not raw image classification accuracy."
+    }
+  },
+  "ood_threshold_ablation": {
+    "0.3": {
+      "n_flagged": 253,
+      "n_remaining": 7481,
+      "macro_f1": 70.23
+    },
+    "0.35": {
+      "n_flagged": 695,
+      "n_remaining": 7039,
+      "macro_f1": 72.85
+    },
+    "0.4": {
+      "n_flagged": 1637,
+      "n_remaining": 6097,
+      "macro_f1": 75.11
+    },
+    "0.45": {
+      "n_flagged": 2811,
+      "n_remaining": 4923,
+      "macro_f1": 77.22
+    },
+    "0.5": {
+      "n_flagged": 4115,
+      "n_remaining": 3619,
+      "macro_f1": 81.12
+    },
+    "0.55": {
+      "n_flagged": 5167,
+      "n_remaining": 2567,
+      "macro_f1": 83.77
+    }
+  },
+  "key_findings": {
+    "F1_A0_no_coordination": 68.28,
+    "F1_A1_ood_only": 75.11,
+    "F1_A4_full_system": 75.11,
+    "improvement_ood": 6.83,
+    "malignant_coverage_A0": 64.3,
+    "malignant_coverage_A4": 69.27
+  }
+}

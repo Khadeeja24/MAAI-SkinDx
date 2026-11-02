@@ -1,0 +1,115 @@
+{
+  "date": "2026-09-18T16:07:40.839372",
+  "seed": 42,
+  "test_size": 7734,
+  "ood_threshold": 0.4,
+  "system_1": {
+    "label": "System 1: Agent 3 Alone",
+    "n_samples": 7734,
+    "accuracy": 70.55,
+    "macro_f1": 68.28,
+    "weighted_f1": 70.4,
+    "macro_precision": 74.8,
+    "macro_recall": 67.04,
+    "per_class_f1": {
+      "Melanoma": 68.1,
+      "Melanocytic Nevus": 34.16,
+      "Basal Cell Carcinoma": 72.68,
+      "Actinic Keratosis / Squamous Cell Carcinoma": 71.05,
+      "Benign Keratosis": 60.11,
+      "Vascular Lesion": 85.16,
+      "Dermatofibroma": 69.7,
+      "Inflammatory": 72.0,
+      "Eczema / Dermatitis": 81.54
+    },
+    "n_evaluated": 7734
+  },
+  "system_2": {
+    "label": "System 2: Agent 3 + OOD Detection",
+    "n_samples": 6097,
+    "accuracy": 76.45,
+    "macro_f1": 75.11,
+    "weighted_f1": 75.86,
+    "macro_precision": 81.18,
+    "macro_recall": 75.65,
+    "per_class_f1": {
+      "Melanoma": 72.61,
+      "Melanocytic Nevus": 32.08,
+      "Basal Cell Carcinoma": 81.83,
+      "Actinic Keratosis / Squamous Cell Carcinoma": 79.09,
+      "Benign Keratosis": 66.35,
+      "Vascular Lesion": 91.33,
+      "Dermatofibroma": 88.89,
+      "Inflammatory": 77.48,
+      "Eczema / Dermatitis": 86.36
+    },
+    "n_evaluated": 6097,
+    "ood_flagged": 1637,
+    "ood_flagged_pct": 21.17,
+    "ood_would_be_correct_pct": 48.56
+  },
+  "system_3": {
+    "label": "System 3: Full Coordination",
+    "n_samples": 6097,
+    "accuracy": 76.45,
+    "macro_f1": 75.11,
+    "weighted_f1": 75.86,
+    "macro_precision": 81.18,
+    "macro_recall": 75.65,
+    "per_class_f1": {
+      "Melanoma": 72.61,
+      "Melanocytic Nevus": 32.08,
+      "Basal Cell Carcinoma": 81.83,
+      "Actinic Keratosis / Squamous Cell Carcinoma": 79.09,
+      "Benign Keratosis": 66.35,
+      "Vascular Lesion": 91.33,
+      "Dermatofibroma": 88.89,
+      "Inflammatory": 77.48,
+      "Eczema / Dermatitis": 86.36
+    },
+    "n_evaluated": 6097,
+    "decision_distribution": {
+      "ROUTINE": 559,
+      "CONCORDANT": 2260,
+      "ESCALATE": 1256,
+      "REQUEST_EVIDENCE": 2022,
+      "OOD_WARNING": 1637
+    },
+    "malignant_true": 2398,
+    "escalated": 1256,
+    "escalation_coverage_pct": 52.38
+  },
+  "ablation": {
+    "0.3": {
+      "n_flagged": 253,
+      "n_remaining": 7481,
+      "macro_f1": 70.23
+    },
+    "0.35": {
+      "n_flagged": 695,
+      "n_remaining": 7039,
+      "macro_f1": 72.85
+    },
+    "0.4": {
+      "n_flagged": 1637,
+      "n_remaining": 6097,
+      "macro_f1": 75.11
+    },
+    "0.45": {
+      "n_flagged": 2811,
+      "n_remaining": 4923,
+      "macro_f1": 77.22
+    },
+    "0.5": {
+      "n_flagged": 4115,
+      "n_remaining": 3619,
+      "macro_f1": 81.12
+    },
+    "0.55": {
+      "n_flagged": 5167,
+      "n_remaining": 2567,
+      "macro_f1": 83.77
+    }
+  },
+  "elapsed_s": 213.6
+}

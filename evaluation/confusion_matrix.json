@@ -1,0 +1,240 @@
+{
+  "date": "2026-10-02T22:26:18.091146",
+  "system1": {
+    "label": "Agent 3 alone (all images)",
+    "n_total": 7734,
+    "macro_f1": 68.28,
+    "accuracy": 70.55,
+    "confusion_matrix": [
+      [
+        856,
+        40,
+        22,
+        21,
+        676,
+        6,
+        1,
+        15,
+        0
+      ],
+      [
+        1,
+        117,
+        7,
+        1,
+        364,
+        3,
+        0,
+        6,
+        0
+      ],
+      [
+        3,
+        4,
+        266,
+        56,
+        34,
+        4,
+        2,
+        5,
+        2
+      ],
+      [
+        5,
+        4,
+        48,
+        265,
+        40,
+        4,
+        0,
+        15,
+        4
+      ],
+      [
+        11,
+        19,
+        7,
+        11,
+        1024,
+        33,
+        0,
+        71,
+        19
+      ],
+      [
+        0,
+        0,
+        3,
+        0,
+        25,
+        1013,
+        2,
+        126,
+        35
+      ],
+      [
+        1,
+        1,
+        0,
+        2,
+        8,
+        1,
+        23,
+        2,
+        0
+      ],
+      [
+        0,
+        0,
+        3,
+        5,
+        38,
+        81,
+        0,
+        918,
+        155
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        3,
+        30,
+        0,
+        192,
+        974
+      ]
+    ],
+    "per_class_f1": {
+      "Melanoma": 68.1,
+      "Melanocytic Nevus": 34.16,
+      "Basal Cell Carcinoma": 72.68,
+      "Actinic Keratosis / SCC": 71.05,
+      "Benign Keratosis": 60.11,
+      "Vascular Lesion": 85.16,
+      "Dermatofibroma": 69.7,
+      "Inflammatory": 72.0,
+      "Eczema / Dermatitis": 81.54
+    }
+  },
+  "system2": {
+    "label": "Full coordination (in-distribution)",
+    "n_total": 6097,
+    "n_ood_removed": 1637,
+    "macro_f1": 75.11,
+    "accuracy": 76.45,
+    "confusion_matrix": [
+      [
+        717,
+        7,
+        7,
+        11,
+        497,
+        2,
+        1,
+        7,
+        0
+      ],
+      [
+        0,
+        77,
+        3,
+        1,
+        299,
+        1,
+        0,
+        3,
+        0
+      ],
+      [
+        0,
+        2,
+        223,
+        42,
+        6,
+        1,
+        2,
+        2,
+        1
+      ],
+      [
+        2,
+        1,
+        30,
+        208,
+        13,
+        1,
+        0,
+        5,
+        2
+      ],
+      [
+        7,
+        9,
+        3,
+        1,
+        901,
+        15,
+        0,
+        28,
+        8
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        8,
+        890,
+        0,
+        58,
+        14
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        16,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        19,
+        57,
+        0,
+        733,
+        119
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        12,
+        0,
+        127,
+        896
+      ]
+    ],
+    "per_class_f1": {
+      "Melanoma": 72.61,
+      "Melanocytic Nevus": 32.08,
+      "Basal Cell Carcinoma": 81.83,
+      "Actinic Keratosis / SCC": 79.09,
+      "Benign Keratosis": 66.35,
+      "Vascular Lesion": 91.33,
+      "Dermatofibroma": 88.89,
+      "Inflammatory": 77.48,
+      "Eczema / Dermatitis": 86.36
+    }
+  }
+}

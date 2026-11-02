@@ -268,7 +268,7 @@ class XAIAgent:
         is_malignant     : bool,
     ) -> str:
         """
-        Generate clinical explanation using Groq LLaMA-3.3-70b.
+        Generate clinical explanation using Groq openai/gpt-oss-120b.
 
         The LLM receives structured Grad-CAM statistics and
         prediction context. It generates a natural language
@@ -441,7 +441,7 @@ class XAIAgent:
             )
 
         explanation_source = (
-            "LLM-generated (Groq LLaMA-3.3-70b)"
+            "LLM-generated (openai/gpt-oss-120b via Groq)"
             if llm_used else
             "Template-based (Groq unavailable)"
         )
