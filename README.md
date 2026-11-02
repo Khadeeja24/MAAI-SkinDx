@@ -123,7 +123,7 @@ Monkeypox (MPOX) · Varicella-Zoster (VZV) · Molluscum Contagiosum (MCV) · Cow
 | PAD-UFES-20 | 2,298 | 6 | Clinical Agent training |
 | Massive Balanced | 262,874 | 34 | Agent 2 feature evaluation |
 | DDI-31 | 647 | 31 | Agent 3 OOD test only |
-| Pox Dataset | — | 5 | Pox Classifier training |
+| Pox Dataset | 6,356 | 5 | Pox Classifier training |
 
 ---
 
