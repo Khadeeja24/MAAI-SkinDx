@@ -21,6 +21,17 @@ models/
 *.pkl
 outputs/agent2_features/
 
+# ── Generated outputs — not source code ───────────────
+outputs/agent4_xai/
+outputs/agent5_rag/
+outputs/agent7_expert/
+
+# ── ChromaDB vector store — generated, not source ─────
+data/chroma_db/
+
+# ── Agent 6 runtime data ───────────────────────────────
+data/agent6/
+
 # ── HAM10000 images ───────────────────────────────────
 data/raw/ham10000/HAM10000_images_part_1/
 data/raw/ham10000/HAM10000_images_part_2/
@@ -28,7 +39,7 @@ data/raw/ham10000/HAM10000_images_part_2/
 # ── Fitzpatrick-17k images ────────────────────────────
 data/raw/fitzpatrick17k/fitzpatrick_3groups/
 
-# ── PAD-UFES-20 images (both folder name variants) ────
+# ── PAD-UFES-20 images ────────────────────────────────
 data/raw/pad_ufes20/imgs_part_1/
 data/raw/pad_ufes20/imgs_part_2/
 data/raw/pad_ufes20/imgs_part_3/
@@ -36,6 +47,9 @@ data/raw/pad_ufes_20/
 
 # ── Massive Balanced — 11 GB, never push ──────────────
 data/raw/massive_balanced/
+
+# ── Pox dataset images ────────────────────────────────
+data/raw/pox_dataset/
 
 # ── Skin detector training images ─────────────────────
 data/raw/skin_detector_training/
@@ -59,9 +73,16 @@ data/raw/ddi31/*.zip
 *.npz
 *.hdf5
 
+# ── Database files ─────────────────────────────────────
+*.sqlite3
+*.db
+
 # ── Documents and PDFs ────────────────────────────────
 Explanation/
 *.pdf
+
+# ── Trust evolution logs ───────────────────────────────
+orchestrator/logs/
 
 # ── Temporary training files ───────────────────────────
 __init_weights_tmp.pth
@@ -82,5 +103,5 @@ envs/
 Thumbs.db
 desktop.ini
 
-# ── VS Code (keep settings out of repo) ───────────────
+# ── VS Code ────────────────────────────────────────────
 .vscode/
